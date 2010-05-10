@@ -1,13 +1,13 @@
 function HCenter(what)
 {
   /* Perform Horizontal Center */
-  what.style.left = ( (window.innerWidth/2) - (what.clientWidth/2) ) + "px"
+  what.style.left = ( (window.innerWidth/2) - (what.width/2) ) + "px" ;
 }
 
 function VCenter(what)
 {
   /* Perform Vertical Center */
-  what.style.top = ( (window.innerHeight/2) - (what.clientHeight/2) ) + "px"
+  what.style.top = ( (window.innerHeight/2) - (what.height/2) ) + "px" ;
 }
 
 function Center(what)

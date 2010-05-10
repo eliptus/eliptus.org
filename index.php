@@ -4,48 +4,72 @@
     <link rel="stylesheet" type="text/css" href=".stylesheets/default.css" />
     <script type="text/javascript" src=".javascripts/default.js">
     </script>
+    <script type="text/javascript" src=".javascripts/fade.js">
+    </script>
+    <script type="text/javascript" src=".javascripts/resize.js">
+    </script>
     <script type="text/javascript">
 
       function eliptus_onmouseover()
       {
-        eliptus = this;
-        eliptus.src = aImages["onmouseover"];
+        var eliptus = this;
+
+        eliptus.src = asImages["onmouseover"];
       }
 
       function eliptus_onmouseout()
       {
-        eliptus = this;
-        eliptus.src = aImages["onmouseout"];
+        var eliptus = this;
+
+        eliptus.src = asImages["onmouseout"];
       }
 
       function eliptus_onload()
       {
-        eliptus = this;
-        document.body.style.backgroundColor = aBackgrounds[eliptus.src];
-        BgImg(eliptus);
+        var eliptus = this;
+
+        document.body.style.backgroundColor = asBackgroundColors[eliptus.src] ;
+        document.body.style.color = asColors[eliptus.src] ;
+
+        BgImg(eliptus) ;
+
+        if ( "black" == document.body.style.backgroundColor )
+        {
+          Fade(eliptus, 1, "FadeSimple", 2000) ;
+          Resize(this, "auto", "auto", 1000);
+        }
+        else
+        {
+          Fade(eliptus, 0, "FadeSimple", 2000) ;
+          Resize(this, "90%", "auto", 1000);
+        }
       }
 
       function window_onload()
       {
-        eliptus = document.getElementById("ELIPTUS");
+        var eliptus = document.getElementById("ELIPTUS");
+
+        eliptus.style.opacity = 0 ;
         eliptus.onmouseover = eliptus_onmouseover;
         eliptus.onmouseout = eliptus_onmouseout;
         eliptus.onload = eliptus_onload;
         eliptus.style.maxWidth = "100%";
         eliptus.style.maxHeight = "100%";
-        eliptus.src = aImages["onload"];
+        eliptus.src = asImages["onload"];
         BgImg(eliptus);
       }
 
       function window_onresize()
       {
-        eliptus = document.getElementById("ELIPTUS");
+        var eliptus = document.getElementById("ELIPTUS");
+
         BgImg(eliptus);
       }
 
-      aImages = new Array();
-      aBackgrounds = new Array();
-      iPreload = new Image();
+      var asImages = new Array();
+      var asBackgroundColors = new Array();
+      var asColors = new Array();
+      var iPreload = new Image();
 
 <?php
 class cBgInfo_t
@@ -53,11 +77,13 @@ class cBgInfo_t
   function __construct
   (
     $sImage,
+    $sBackgroundColor,
     $sColor,
     $saEvents
   )
   {
     $this->sImage = $sImage;
+    $this->sBackgroundColor = $sBackgroundColor;
     $this->sColor = $sColor;
     $this->saEvents = $saEvents;
   }
@@ -69,6 +95,7 @@ $acBgInfo = array
   (
     ".images/Eliptus Ambigram - Sharp.jpg",
     "black",
+    "red",
     array
     (
       "onload",
@@ -79,6 +106,7 @@ $acBgInfo = array
   (
     ".images/Eliptus Ambigram - Inverted.jpg",
     "red",
+    "black",
     array
     (
       "onmouseover"
@@ -90,10 +118,11 @@ while ( 0 < count($acBgInfo) )
 {
   $cTmpBgInfo = array_shift($acBgInfo);
   echo "      iPreload.src = \"" . $cTmpBgInfo->sImage . "\";\n";
-  echo "      aBackgrounds[iPreload.src] = \"" . $cTmpBgInfo->sColor . "\";\n";
+  echo "      asBackgroundColors[iPreload.src] = \"" . $cTmpBgInfo->sBackgroundColor . "\";\n";
+  echo "      asColors[iPreload.src] = \"" . $cTmpBgInfo->sColor . "\";\n";
   while ( 0 < count($cTmpBgInfo->saEvents) )
   {
-    echo "      aImages[\"" . array_shift($cTmpBgInfo->saEvents) . "\"] = iPreload.src;\n";
+    echo "      asImages[\"" . array_shift($cTmpBgInfo->saEvents) . "\"] = iPreload.src;\n";
   }
 }
 ?>
