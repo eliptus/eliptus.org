@@ -35,12 +35,12 @@
 
         if ( "black" == document.body.style.backgroundColor )
         {
-          Fade(eliptus, 1, "FadeSimple", 2000) ;
+          Fade(eliptus, 1, 2000) ;
           Resize(this, "auto", "auto", 1000);
         }
         else
         {
-          Fade(eliptus, 0, "FadeSimple", 2000) ;
+          Fade(eliptus, 0, 2000) ;
           Resize(this, "90%", "auto", 1000);
         }
       }

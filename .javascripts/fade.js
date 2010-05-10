@@ -1,20 +1,27 @@
-var ganTimeToFade = new Array() ;
-var ganFadeTimeStarted = new Array() ;
-var gasFadeCallbacks = new Array() ;
-var gaFadeIntervals = new Array() ;
+var gaoFades = new Array() ;
 
-function Fade(what, nOpacityGoal, sType, nTimeToFade, sCallback)
+function FadeObject()
+{
+}
+
+function Fade(what, nOpacityGoal, nTimeToFade, sCallback)
 {
   var sElementID ;
-  var nTimeStarted ;
-  var sIntervalCommand ;
+  var oFade ;
 
   sElementID = what.id ;
 
-  if ( null != gaFadeIntervals[sElementID] )
+  if ( null == gaoFades[sElementID] )
   {
-    clearInterval(gaFadeIntervals[sElementID]) ;
-    delete gaFadeIntervals[sElementID] ;
+    gaoFades[sElementID] = new FadeObject() ;
+  }
+
+  oFade = gaoFades[sElementID] ;
+
+  if ( null != oFade.oInterval )
+  {
+    clearInterval(oFade.oInterval) ;
+    delete oFade.oInterval ;
   }
   else if ( '' == what.style.opacity)
   {
@@ -26,57 +33,50 @@ function Fade(what, nOpacityGoal, sType, nTimeToFade, sCallback)
     nTimeToFade = 0 ;
   }
 
-  nTimeStarted = new Date().getTime() ;
+  oFade.nOpacityGoal = nOpacityGoal ;
+  oFade.nTimeToFade = nTimeToFade ;
+  oFade.sCallback = sCallback ;
+  oFade.nTimeStarted = new Date().getTime() ;
+  oFade.oInterval = setInterval('FadeWork("' + sElementID + '")', 30) ;
 
-  sIntervalCommand = '' ;
-  sIntervalCommand += sType ;
-  sIntervalCommand += '("' ;
-  sIntervalCommand += sElementID ;
-  sIntervalCommand += '", ' ;
-  sIntervalCommand += nOpacityGoal ;
-  sIntervalCommand += ')' ;
-
-  ganTimeToFade[sElementID] = nTimeToFade ;
-  ganFadeTimeStarted[sElementID] = nTimeStarted ;
-  gasFadeCallbacks[sElementID] = sCallback ;
-  gaFadeIntervals[sElementID] = setInterval(sIntervalCommand, 30) ;
-
-  eval(sIntervalCommand);
+  FadeWork(sElementID) ;
 }
 
-function FadeSimple(sElementID, nOpacityGoal)
+function FadeWork(sElementID)
 {
   var what ;
+  var oFade ;
   var nTimeCurrent ;
   var nTimeElapsed ;
   var nOpacityStep ;
 
   what = document.getElementById(sElementID) ;
+  oFade = gaoFades[sElementID] ;
 
   nTimeCurrent = new Date().getTime() ;
-  nTimeElapsed = nTimeCurrent - ganFadeTimeStarted[sElementID] ;
+  nTimeElapsed = nTimeCurrent - oFade.nTimeStarted ;
 
-  if ( nTimeElapsed < ganTimeToFade[sElementID] )
+  if ( nTimeElapsed < oFade.nTimeToFade )
   {
-    nOpacityStep = nOpacityGoal - what.style.opacity ;
-    nOpacityStep *= ( nTimeElapsed ) / ganTimeToFade[sElementID] ;
+    nOpacityStep = oFade.nOpacityGoal - what.style.opacity ;
+    nOpacityStep *= ( nTimeElapsed ) / oFade.nTimeToFade ;
 
     what.style.opacity = Number(what.style.opacity) + nOpacityStep ;
 
-    ganTimeToFade[sElementID] -= nTimeElapsed ;
-    ganFadeTimeStarted[sElementID] = nTimeCurrent ;
+    oFade.nTimeToFade -= nTimeElapsed ;
+    oFade.nTimeStarted = nTimeCurrent ;
   }
   else
   {
-    clearInterval(gaFadeIntervals[sElementID]) ;
-    delete gaFadeIntervals[sElementID] ;
+    clearInterval(oFade.oInterval) ;
+    delete oFade.oInterval ;
 
-    what.style.opacity = nOpacityGoal ;
+    what.style.opacity = oFade.nOpacityGoal ;
 
-    if ( null != gasFadeCallbacks[sElementID] )
+    if ( null != oFade.sCallback )
     {
-      eval(gasFadeCallbacks[sElementID]) ;
-      delete gasFadeCallbacks[sElementID] ;
+      eval(oFade.sCallback) ;
+      delete oFade.sCallback ;
     }
   }
 }

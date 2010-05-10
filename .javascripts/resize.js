@@ -1,20 +1,27 @@
-var ganTimeToResize = new Array() ;
-var ganResizeTimeStarted = new Array() ;
-var gasResizeCallbacks = new Array() ;
-var gaResizeIntervals = new Array() ;
+var gaoResizes = new Array() ;
+
+function ResizeObject()
+{
+}
 
 function Resize(what, nWidthGoal, nHeightGoal, nTimeToResize, sCallback)
 {
   var sElementID ;
-  var nTimeStarted ;
-  var sIntervalCommand ;
+  var oResize ;
 
   sElementID = what.id ;
 
-  if ( null != gaResizeIntervals[sElementID] )
+  if ( null == gaoResizes[sElementID] )
   {
-    clearInterval(gaResizeIntervals[sElementID]) ;
-    delete gaResizeIntervals[sElementID] ;
+    gaoResizes[sElementID] = new ResizeObject() ;
+  }
+
+  oResize = gaoResizes[sElementID] ;
+
+  if ( null != oResize.oInterval )
+  {
+    clearInterval(oResize.oInterval) ;
+    delete oResize.oInterval ;
   }
 
   if ( isNaN(nWidthGoal) || isNaN(nHeightGoal) )
@@ -38,6 +45,7 @@ function Resize(what, nWidthGoal, nHeightGoal, nTimeToResize, sCallback)
     }
 
     what.parentNode.removeChild(eClone) ;
+    delete eClone ;
   }
 
   if ( null == nTimeToResize )
@@ -45,80 +53,56 @@ function Resize(what, nWidthGoal, nHeightGoal, nTimeToResize, sCallback)
     nTimeToResize = 0 ;
   }
 
-  nTimeStarted = new Date().getTime() ;
+  oResize.nWidthGoal = nWidthGoal ;
+  oResize.nHeightGoal = nHeightGoal ;
+  oResize.nTimeToResize = nTimeToResize ;
+  oResize.sCallback = sCallback ;
+  oResize.nTimeStarted = new Date().getTime() ;
+  oResize.oInterval = setInterval('ResizeWork("' + sElementID + '")', 30) ;
 
-  sIntervalCommand = '' ;
-  sIntervalCommand += 'ResizeWork' ;
-  sIntervalCommand += '("' ;
-  sIntervalCommand += sElementID ;
-  sIntervalCommand += '", ' ;
-  sIntervalCommand += nWidthGoal ;
-  sIntervalCommand += ', ' ;
-  sIntervalCommand += nHeightGoal ;
-  sIntervalCommand += ')' ;
-
-  ganTimeToResize[sElementID] = nTimeToResize ;
-  ganResizeTimeStarted[sElementID] = nTimeStarted ;
-  gasResizeCallbacks[sElementID] = sCallback ;
-  gaResizeIntervals[sElementID] = setInterval(sIntervalCommand, 30) ;
-
-  eval(sIntervalCommand);
+  ResizeWork(sElementID) ;
 }
 
-function ResizeWork(sElementID, nWidthGoal, nHeightGoal)
+function ResizeWork(sElementID)
 {
   var what ;
+  var oResize ;
   var nTimeCurrent ;
   var nTimeElapsed ;
   var nWidthStep ;
-  var nOffsetLeft ;
   var nHeightStep ;
-  var nOffsetTop ;
 
   what = document.getElementById(sElementID) ;
+  oResize = gaoResizes[sElementID] ;
 
   nTimeCurrent = new Date().getTime() ;
-  nTimeElapsed = nTimeCurrent - ganResizeTimeStarted[sElementID] ;
+  nTimeElapsed = nTimeCurrent - oResize.nTimeStarted ;
 
-  if ( nTimeElapsed < ganTimeToResize[sElementID] )
+  if ( nTimeElapsed < oResize.nTimeToResize )
   {
-    nWidthStep = nWidthGoal - what.width ;
-    nOffsetLeft = nWidthStep / 2 ;
-    nHeightStep = nHeightGoal - what.height ;
-    nOffsetTop = nHeightStep / 2 ;
-    nWidthStep *= ( nTimeElapsed ) / ganTimeToResize[sElementID] ;
-    nOffsetLeft *= ( nTimeElapsed ) / ganTimeToResize[sElementID] ;
-    nOffsetLeft = what.offsetLeft - nOffsetLeft ;
-    nHeightStep *= ( nTimeElapsed ) / ganTimeToResize[sElementID] ;
-    nOffsetTop *= ( nTimeElapsed ) / ganTimeToResize[sElementID] ;
-    nOffsetTop = what.offsetTop - nOffsetTop ;
+    nWidthStep = oResize.nWidthGoal - what.width ;
+    nHeightStep = oResize.nHeightGoal - what.height ;
+    nWidthStep *= ( nTimeElapsed ) / oResize.nTimeToResize ;
+    nHeightStep *= ( nTimeElapsed ) / oResize.nTimeToResize ;
 
-    what.width = what.width + nWidthStep ;
-    what.style.left = nOffsetLeft + "px" ;
-    what.height = what.height + nHeightStep ;
-    what.style.top = nOffsetTop + "px" ;
+    what.width += nWidthStep ;
+    what.height += nHeightStep ;
 
-    ganTimeToResize[sElementID] -= nTimeElapsed ;
-    ganResizeTimeStarted[sElementID] = nTimeCurrent ;
+    oResize.nTimeToResize -= nTimeElapsed ;
+    oResize.nTimeStarted = nTimeCurrent ;
   }
   else
   {
-    clearInterval(gaResizeIntervals[sElementID]) ;
-    delete gaResizeIntervals[sElementID] ;
+    clearInterval(oResize.oInterval) ;
+    delete oResize.oInterval ;
 
-    what.width = nWidthGoal ;
-    what.height = nHeightGoal ;
+    what.width = oResize.nWidthGoal ;
+    what.height = oResize.nHeightGoal ;
 
-    if ( null != gasResizeCallbacks[sElementID] )
+    if ( null != oResize.sCallback )
     {
-      eval(gasResizeCallbacks[sElementID]) ;
-      delete gasResizeCallbacks[sElementID] ;
+      eval(oResize.sCallback) ;
+      delete oResize.sCallback ;
     }
   }
-
-  //var debug = document.getElementById("debug") ;
-  //debug.innerHTML = '' ;
-  //debug.innerHTML += what.offsetLeft + what.width / 2 - window.innerWidth / 2 ;
-  //debug.innerHTML += "," ;
-  //debug.innerHTML += what.offsetTop + what.height / 2 - window.innerHeight / 2 ;
 }
