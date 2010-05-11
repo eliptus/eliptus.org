@@ -4,7 +4,7 @@ function ResizeObject()
 {
 }
 
-function Resize(what, nWidthGoal, nHeightGoal, nTimeToResize, sCallback)
+function Resize(what, nWidthGoal, nHeightGoal, nTimeToResize, fCallback, vArg)
 {
   var sElementID ;
   var oResize ;
@@ -56,7 +56,8 @@ function Resize(what, nWidthGoal, nHeightGoal, nTimeToResize, sCallback)
   oResize.nWidthGoal = nWidthGoal ;
   oResize.nHeightGoal = nHeightGoal ;
   oResize.nTimeToResize = nTimeToResize ;
-  oResize.sCallback = sCallback ;
+  oResize.fCallback = fCallback ;
+  oResize.vArg = vArg ;
   oResize.nTimeStarted = new Date().getTime() ;
   oResize.oInterval = setInterval('ResizeWork("' + sElementID + '")', 30) ;
 
@@ -85,11 +86,16 @@ function ResizeWork(sElementID)
     nWidthStep *= ( nTimeElapsed ) / oResize.nTimeToResize ;
     nHeightStep *= ( nTimeElapsed ) / oResize.nTimeToResize ;
 
+    oResize.nTimeToResize -= nTimeElapsed ;
+    oResize.nTimeStarted = nTimeCurrent ;
+
     what.width += nWidthStep ;
     what.height += nHeightStep ;
 
-    oResize.nTimeToResize -= nTimeElapsed ;
-    oResize.nTimeStarted = nTimeCurrent ;
+    if ( null != oResize.fCallback )
+    {
+      oResize.fCallback(new Array("Fade", "Pending"), oResize.vArg) ;
+    }
   }
   else
   {
@@ -99,10 +105,11 @@ function ResizeWork(sElementID)
     what.width = oResize.nWidthGoal ;
     what.height = oResize.nHeightGoal ;
 
-    if ( null != oResize.sCallback )
+    if ( null != oResize.fCallback )
     {
-      eval(oResize.sCallback) ;
-      delete oResize.sCallback ;
+      oResize.fCallback(new Array("Fade", "Complete"), oResize.vArg) ;
+      delete oResize.fCallback ;
+      delete oResize.vArg ;
     }
   }
 }

@@ -4,7 +4,7 @@ function FadeObject()
 {
 }
 
-function Fade(what, nOpacityGoal, nTimeToFade, sCallback)
+function Fade(what, nOpacityGoal, nTimeToFade, fCallback, vArg)
 {
   var sElementID ;
   var oFade ;
@@ -35,7 +35,8 @@ function Fade(what, nOpacityGoal, nTimeToFade, sCallback)
 
   oFade.nOpacityGoal = nOpacityGoal ;
   oFade.nTimeToFade = nTimeToFade ;
-  oFade.sCallback = sCallback ;
+  oFade.fCallback = fCallback ;
+  oFade.vArg = vArg ;
   oFade.nTimeStarted = new Date().getTime() ;
   oFade.oInterval = setInterval('FadeWork("' + sElementID + '")', 30) ;
 
@@ -61,10 +62,15 @@ function FadeWork(sElementID)
     nOpacityStep = oFade.nOpacityGoal - what.style.opacity ;
     nOpacityStep *= ( nTimeElapsed ) / oFade.nTimeToFade ;
 
-    what.style.opacity = Number(what.style.opacity) + nOpacityStep ;
-
     oFade.nTimeToFade -= nTimeElapsed ;
     oFade.nTimeStarted = nTimeCurrent ;
+
+    what.style.opacity = Number(what.style.opacity) + nOpacityStep ;
+
+    if ( null != oFade.fCallback )
+    {
+      oFade.fCallback(new Array("Fade", "Pending"), oFade.vArg) ;
+    }
   }
   else
   {
@@ -73,10 +79,11 @@ function FadeWork(sElementID)
 
     what.style.opacity = oFade.nOpacityGoal ;
 
-    if ( null != oFade.sCallback )
+    if ( null != oFade.fCallback )
     {
-      eval(oFade.sCallback) ;
-      delete oFade.sCallback ;
+      oFade.fCallback(new Array("Fade", "Complete"), oFade.vArg) ;
+      delete oFade.fCallback ;
+      delete oFade.vArg ;
     }
   }
 }

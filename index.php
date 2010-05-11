@@ -36,12 +36,12 @@
         if ( "black" == document.body.style.backgroundColor )
         {
           Fade(eliptus, 1, 2000) ;
-          Resize(this, "auto", "auto", 1000);
+          Resize(this, "50%", "auto", 1000, function(vArg1,vArg2){BgImg(vArg2);}, eliptus);
         }
         else
         {
           Fade(eliptus, 0, 2000) ;
-          Resize(this, "90%", "auto", 1000);
+          Resize(this, "90%", "auto", 1000, function(vArg1,vArg2){BgImg(vArg2);}, eliptus);
         }
       }
 
