@@ -29,7 +29,7 @@ function Resize(what, nWidthGoal, nHeightGoal, nTimeToResize, fCallback, vArg)
     var eClone ;
 
     eClone = what.cloneNode(true) ;
-    eClone.style.opacity = 0 ;
+    eClone.style.visibility = "hidden" ;
     what.parentNode.appendChild(eClone) ;
 
     if ( isNaN(nWidthGoal) )
@@ -94,7 +94,7 @@ function ResizeWork(sElementID)
 
     if ( null != oResize.fCallback )
     {
-      oResize.fCallback(new Array("Fade", "Pending"), oResize.vArg) ;
+      oResize.fCallback(new Array("Resize", "Pending"), oResize.vArg) ;
     }
   }
   else
@@ -107,7 +107,7 @@ function ResizeWork(sElementID)
 
     if ( null != oResize.fCallback )
     {
-      oResize.fCallback(new Array("Fade", "Complete"), oResize.vArg) ;
+      oResize.fCallback(new Array("Resize", "Complete"), oResize.vArg) ;
       delete oResize.fCallback ;
       delete oResize.vArg ;
     }
