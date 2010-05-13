@@ -25,42 +25,36 @@ function Move(what, nXGoal, nYGoal, nWidthGoal, nHeightGoal, nTimeToMove, fCallb
     delete oMove.oInterval ;
   }
 
-  if ( null == nXGoal )
-  {
-    nXGoal = what.offsetLeft + what.width / 2 ;
-  }
-  if ( null == nYGoal )
-  {
-    nYGoal = what.offsetTop + what.height / 2 ;
-  }
-  if ( null == nWidthGoal )
-  {
-    nWidthGoal = what.width ;
-  }
-  if ( null == nHeightGoal )
-  {
-    nHeightGoal = what.height ;
-  }
-
   eClone = what.cloneNode(true) ;
   eClone.style.visibility = "hidden" ;
   what.parentNode.appendChild(eClone) ;
 
-  eClone.style.left = nXGoal ;
-  eClone.style.top = nYGoal ;
-  eClone.style.width = nWidthGoal ;
-  eClone.style.height = nHeightGoal ;
+  if ( null != nXGoal )
+  {
+    eClone.style.left = nXGoal ;
+    nXGoal = eClone.offsetLeft ;
+  }
+  if ( null != nYGoal )
+  {
+    eClone.style.top = nYGoal ;
+    nYGoal = eClone.offsetTop ;
+  }
+  if ( null != nWidthGoal )
+  {
+    eClone.style.width = nWidthGoal ;
+    nWidthGoal = eClone.width ;
+  }
+  if ( null != nHeightGoal )
+  {
+    eClone.style.height = nHeightGoal ;
+    nHeightGoal = eClone.height ;
+  }
 
-  nXGoal = eClone.offsetLeft ;
-  nYGoal = eClone.offsetTop ;
-  nWidthGoal = eClone.width ;
-  nHeightGoal = eClone.height ;
-
-  if ( "auto" != eClone.style.left )
+  if ( (null != nXGoal) && ("auto" != eClone.style.left) )
   {
       nXGoal -= eClone.width / 2 ;
   }
-  if ( "auto" != eClone.style.top )
+  if ( (null != nYGoal) && ("auto" != eClone.style.top) )
   {
       nYGoal -= eClone.height / 2 ;
   }
@@ -105,23 +99,33 @@ function MoveWork(sElementID)
 
   if ( nTimeElapsed < oMove.nTimeToMove )
   {
-    nXStep = oMove.nXGoal - what.offsetLeft ;
-    nYStep = oMove.nYGoal - what.offsetTop ;
-    nWidthStep = oMove.nWidthGoal - what.width ;
-    nHeightStep = oMove.nHeightGoal - what.height ;
-
-    nXStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-    nYStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-    nWidthStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-    nHeightStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
+    if ( null != oMove.nXGoal )
+    {
+      nXStep = oMove.nXGoal - what.offsetLeft ;
+      nXStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
+      what.style.left = String(nXStep + what.offsetLeft) + 'px' ;
+    }
+    if ( null != oMove.nYGoal )
+    {
+      nYStep = oMove.nYGoal - what.offsetTop ;
+      nYStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
+      what.style.top = String(nYStep + what.offsetTop) + 'px' ;
+    }
+    if ( null != oMove.nWidthGoal )
+    {
+      nWidthStep = oMove.nWidthGoal - what.width ;
+      nWidthStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
+      what.style.width = String(nWidthStep + what.width) + 'px';
+    }
+    if ( null != oMove.nHeightGoal )
+    {
+      nHeightStep = oMove.nHeightGoal - what.height ;
+      nHeightStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
+      what.style.height = String(nHeightStep + what.height) + 'px';
+    }
 
     oMove.nTimeToMove -= nTimeElapsed ;
     oMove.nTimeStarted = nTimeCurrent ;
-
-    what.style.left = String(nXStep + what.offsetLeft) + 'px' ;
-    what.style.top = String(nYStep + what.offsetTop) + 'px' ;
-    what.style.width = String(nWidthStep + what.width) + 'px';
-    what.style.height = String(nHeightStep + what.height) + 'px';
 
     if ( null != oMove.fCallback )
     {
@@ -133,10 +137,22 @@ function MoveWork(sElementID)
     clearInterval(oMove.oInterval) ;
     delete oMove.oInterval ;
 
-    what.style.left = String(oMove.nXGoal) + 'px' ;
-    what.style.top = String(oMove.nYGoal) + 'px' ;
-    what.style.width = String(oMove.nWidthGoal) + 'px';
-    what.style.height = String(oMove.nHeightGoal) + 'px';
+    if ( null != oMove.nXGoal )
+    {
+      what.style.left = String(oMove.nXGoal) + 'px' ;
+    }
+    if ( null != oMove.nYGoal )
+    {
+      what.style.top = String(oMove.nYGoal) + 'px' ;
+    }
+    if ( null != oMove.nWidthGoal )
+    {
+      what.style.width = String(oMove.nWidthGoal) + 'px';
+    }
+    if ( null != oMove.nHeightGoal )
+    {
+      what.style.height = String(oMove.nHeightGoal) + 'px';
+    }
 
     if ( null != oMove.fCallback )
     {
