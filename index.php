@@ -6,8 +6,6 @@
     </script>
     <script type="text/javascript" src=".javascripts/fade.js">
     </script>
-    <script type="text/javascript" src=".javascripts/resize.js">
-    </script>
     <script type="text/javascript">
 
       function eliptus_onmouseover()
@@ -31,20 +29,21 @@
         document.body.style.backgroundColor = asBackgroundColors[eliptus.src] ;
         document.body.style.color = asColors[eliptus.src] ;
 
-        BgImg(eliptus) ;
-
         if ( "black" == document.body.style.backgroundColor )
         {
           Fade(eliptus, 1, 2000) ;
-          Resize(this, "50%", "auto", 1000, function(vArg1,vArg2){BgImg(vArg2);}, eliptus) ;
-          Move(this, "50%", "50%", 1000) ;
         }
         else
         {
           Fade(eliptus, 0, 2000) ;
-          Resize(this, "90%", "auto", 1000, function(vArg1,vArg2){BgImg(vArg2);}, eliptus) ;
-          Move(this, "50%", "50%", 1000) ;
         }
+      }
+
+      function eliptus_onclick()
+      {
+        var eliptus = this;
+
+        Move(eliptus, "120px", "auto", "240px", "auto", 1500) ;
       }
 
       function window_onload()
@@ -55,17 +54,20 @@
         eliptus.onmouseover = eliptus_onmouseover;
         eliptus.onmouseout = eliptus_onmouseout;
         eliptus.onload = eliptus_onload;
+        eliptus.onclick = eliptus_onclick ;
         eliptus.style.maxWidth = "100%";
         eliptus.style.maxHeight = "100%";
         eliptus.src = asImages["onload"];
-        BgImg(eliptus);
+        eliptus.style.position = "fixed" ;
+        eliptus.style.zIndex = -1 ;
+        Move(eliptus, "50%", "50%") ;
       }
 
       function window_onresize()
       {
         var eliptus = document.getElementById("ELIPTUS");
 
-        BgImg(eliptus);
+        Move(eliptus, "50%", "50%") ;
       }
 
       var asImages = new Array();
