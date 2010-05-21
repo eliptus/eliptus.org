@@ -31,19 +31,12 @@
 
         if ( "black" == document.body.style.backgroundColor )
         {
-          Fade(eliptus, 1, 2000) ;
+          Fade(eliptus, 1, 1000) ;
         }
         else
         {
-          Fade(eliptus, 0, 2000) ;
+          Fade(eliptus, 0, 1000) ;
         }
-      }
-
-      function eliptus_onclick()
-      {
-        var eliptus = this;
-
-        Move(eliptus, "120px", "auto", "240px", "auto", 1500) ;
       }
 
       function window_onload()
@@ -54,20 +47,7 @@
         eliptus.onmouseover = eliptus_onmouseover;
         eliptus.onmouseout = eliptus_onmouseout;
         eliptus.onload = eliptus_onload;
-        eliptus.onclick = eliptus_onclick ;
-        eliptus.style.maxWidth = "100%";
-        eliptus.style.maxHeight = "100%";
         eliptus.src = asImages["onload"];
-        eliptus.style.position = "fixed" ;
-        eliptus.style.zIndex = -1 ;
-        Move(eliptus, "50%", "50%") ;
-      }
-
-      function window_onresize()
-      {
-        var eliptus = document.getElementById("ELIPTUS");
-
-        Move(eliptus, "50%", "50%") ;
       }
 
       var asImages = new Array();
@@ -140,10 +120,10 @@ while ( 0 < count($acBgInfo) )
     </title>
   </head>
   <body>
-    <div id="debug">
-    </div>
-    <div>
-      <img id="ELIPTUS" alt="ELIPTUS" src="" />
+    <div class="SplashContainer" >
+      <img class="SplashContent" id="ELIPTUS" alt="ELIPTUS" src="" />
+      <span class="SplashVerticalSpacer" >
+      </span>
     </div>
   </body>
 </html>
