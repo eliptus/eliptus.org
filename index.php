@@ -2,11 +2,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <link rel="stylesheet" type="text/css" href=".stylesheets/default.css" />
-    <script type="text/javascript" src=".javascripts/default.js">
-    </script>
-    <script type="text/javascript" src=".javascripts/fade.js">
-    </script>
+    <link rel="stylesheet" type="text/css" href=".stylesheets/default.css" ></link>
+    <script type="text/javascript" src=".javascripts/default.js" ></script>
+    <script type="text/javascript" src=".javascripts/fade.js" ></script>
     <script type="text/javascript">
 
       function eliptus_onmouseover()
@@ -122,8 +120,8 @@ while ( 0 < count($acBgInfo) )
   </head>
   <body>
     <div class="SplashContainer" >
-      <img class="SplashContent" id="ELIPTUS" alt="ELIPTUS" src="" />
-      <span class="SplashVerticalSpacer" />
+      <img class="SplashContent" id="ELIPTUS" alt="ELIPTUS" src="" ></img>
+      <span class="SplashVerticalSpacer" ></span>
     </div>
   </body>
 </html>
