@@ -28,7 +28,6 @@ function Move(what, nXGoal, nYGoal, nWidthGoal, nHeightGoal, nTimeToMove, fCallb
   eClone = what.cloneNode(true) ;
   eClone.style.visibility = "hidden" ;
   what.parentNode.appendChild(eClone) ;
-
   if ( null != nXGoal )
   {
     eClone.style.left = nXGoal ;
@@ -42,23 +41,13 @@ function Move(what, nXGoal, nYGoal, nWidthGoal, nHeightGoal, nTimeToMove, fCallb
   if ( null != nWidthGoal )
   {
     eClone.style.width = nWidthGoal ;
-    nWidthGoal = eClone.width ;
+    nWidthGoal = eClone.offsetWidth ;
   }
   if ( null != nHeightGoal )
   {
     eClone.style.height = nHeightGoal ;
-    nHeightGoal = eClone.height ;
+    nHeightGoal = eClone.offsetHeight ;
   }
-
-  if ( (null != nXGoal) && ("auto" != eClone.style.left) )
-  {
-      nXGoal -= eClone.width / 2 ;
-  }
-  if ( (null != nYGoal) && ("auto" != eClone.style.top) )
-  {
-      nYGoal -= eClone.height / 2 ;
-  }
-
   what.parentNode.removeChild(eClone) ;
   delete eClone ;
 
@@ -113,15 +102,15 @@ function MoveWork(sElementID)
     }
     if ( null != oMove.nWidthGoal )
     {
-      nWidthStep = oMove.nWidthGoal - what.width ;
+      nWidthStep = oMove.nWidthGoal - what.offsetWidth ;
       nWidthStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-      what.style.width = String(nWidthStep + what.width) + 'px';
+      what.style.width = String(nWidthStep + what.offsetWidth) + 'px';
     }
     if ( null != oMove.nHeightGoal )
     {
-      nHeightStep = oMove.nHeightGoal - what.height ;
+      nHeightStep = oMove.nHeightGoal - what.offsetHeight ;
       nHeightStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-      what.style.height = String(nHeightStep + what.height) + 'px';
+      what.style.height = String(nHeightStep + what.offsetHeight) + 'px';
     }
 
     oMove.nTimeToMove -= nTimeElapsed ;
@@ -177,5 +166,35 @@ function fGetWindowOffset(oElement)
   }
 
   return [nOffsetLeft, nOffsetTop] ;
+}
+
+function HeaderObject()
+{
+  this.ContentSet = _HeaderContentSet ;
+  this.Add = _HeaderAdd ;
+
+  this.Element = Document.createElement("div") ;
+  this.Element.className = "HeaderContainer"
+}
+
+function _HeaderContentSet(eContent)
+{
+  var eFirstChild = this.Element.firstChild ;
+
+  eContent.className = "HeaderContent" ;
+
+  if ( null == eFirstChild )
+  {
+    this.Element.appendChild(eContent) ;
+  }
+  else
+  {
+    this.Element.replaceChild(eContent, eFirstChild) ;
+  }
+}
+
+function _HeaderAdd(eParent)
+{
+  eParent.appendChild(this.Element) ;
 }
 

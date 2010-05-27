@@ -30,3 +30,21 @@ body
   width : 0% ;
 }
 
+.HeaderContainer
+{
+  position : fixed ;
+  text-align : center ;
+  left : 0px ;
+  top : 0px ;
+  width : 100px ;
+  height : 100px ;
+}
+
+.HeaderContainer .HeaderContent
+{
+  display : inline-block ;
+  vertical-align : middle ;
+  max-width : 100% ;
+  max-height : 100% ;
+}
+

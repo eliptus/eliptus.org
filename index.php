@@ -5,45 +5,55 @@
     <link rel="stylesheet" type="text/css" href=".stylesheets/default.css" ></link>
     <script type="text/javascript" src=".javascripts/default.js" ></script>
     <script type="text/javascript" src=".javascripts/fade.js" ></script>
+    <script type="text/javascript" src=".javascripts/splash.js" ></script>
     <script type="text/javascript">
 
       var Window = window ;
       var Document = document ;
-      var iEliptus = null ;
+      var iEliptus = new Image() ;
+      var oSplash = new SplashObject() ;
+      var oHeader = new HeaderObject() ;
+
+      function EliptusOnMove(aStatus)
+      {
+        if ( "Complete" == aStatus[1] )
+        {
+          iEliptus.style.visibility = "visible" ;
+          iClone.style.visibility = "hidden" ;
+
+          Document.body.removeChild(iClone) ;
+          delete iClone ;
+        }
+      }
 
       function EliptusOnClick()
       {
-          iClone = null ;
-          anOffsetCurrent = new Array() ;
-          anOffsetGoal = new Array() ;
+        iClone = null ;
+        anOffsetCurrent = new Array() ;
+        anOffsetGoal = new Array() ;
 
-          anOffsetCurrent = anOffsetCurrent.concat(fGetWindowOffset(iEliptus)) ;
-          anOffsetCurrent.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
+        anOffsetCurrent = anOffsetCurrent.concat(fGetWindowOffset(iEliptus)) ;
+        anOffsetCurrent.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
 
-          iClone = iEliptus.cloneNode(true) ;
-          iClone.style.visibility = "hidden" ;
-          iClone.style.position = "fixed" ;
-          iClone.style.left = String(anOffsetCurrent[0]) + "px" ;
-          iClone.style.top = String(anOffsetCurrent[1]) + "px" ;
-          iClone.style.width = String(anOffsetCurrent[2]) + "px" ;
-          iClone.style.height = String(anOffsetCurrent[3]) + "px" ;
+        iClone = iEliptus.cloneNode(true) ;
+        iClone.id = "iClone" ;
+        iClone.style.visibility = "hidden" ;
+        iClone.style.position = "fixed" ;
+        iClone.style.left = String(anOffsetCurrent[0]) + "px" ;
+        iClone.style.top = String(anOffsetCurrent[1]) + "px" ;
+        iClone.style.width = String(anOffsetCurrent[2]) + "px" ;
+        iClone.style.height = String(anOffsetCurrent[3]) + "px" ;
+        Document.body.appendChild(iClone) ;
 
-          Document.body.appendChild(iClone) ;
-          iClone.style.visibility = "visible" ;
+        iClone.style.visibility = "visible" ;
+        iEliptus.style.visibility = "hidden" ;
 
-          iEliptus.style.visibility = "hidden" ;
+        oHeader.ContentSet(iEliptus) ;
 
-          var debug = Document.getElementById("debug") ;
+        anOffsetGoal = anOffsetGoal.concat(fGetWindowOffset(iEliptus)) ;
+        anOffsetGoal.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
 
-          if ( null == debug )
-          {
-            debug = Document.createElement("div") ;
-            debug.id = "debug" ;
-            Document.body.appendChild(debug) ;
-          }
-
-          //debug.innerHTML += String(anOffsetCurrent) ;
-
+        Move(iClone, String(anOffsetGoal[0]) + "px", String(anOffsetGoal[1]) + "px", String(anOffsetGoal[2]) + "px", String(anOffsetGoal[3]) + "px", 1000, EliptusOnMove) ;
       }
 
       function EliptusOnFade(aStatus)
@@ -58,11 +68,8 @@
       {
         Window.onload = "" ;
 
-        iEliptus = Document.getElementById("ELIPTUS") ;
-
-        iEliptus.style.opacity = 0 ;
-        iEliptus.src = ".images/Eliptus Ambigram - Sharp.jpg" ;
-        iEliptus.alt = "ELIPTUS" ;
+        oHeader.Add(Document.body) ;
+        oSplash.Add(Document.body) ;
       }
 
       function WindowOnMouseOver()
@@ -75,15 +82,18 @@
       Window.onload = WindowOnLoad ;
       Window.onmouseover = WindowOnMouseOver ;
 
+      iEliptus.id = "ELIPTUS" ;
+      iEliptus.style.opacity = 0 ;
+      iEliptus.src = ".images/Eliptus Ambigram - Sharp.jpg" ;
+      iEliptus.alt = "ELIPTUS" ;
+
+      oSplash.ContentSet(iEliptus) ;
+
     </script>
     <title>
       ELIPTUS
     </title>
   </head>
   <body>
-    <div class="SplashContainer" >
-      <img class="SplashContent" id="ELIPTUS" alt="" src="" ></img>
-      <span class="SplashVerticalSpacer" ></span>
-    </div>
   </body>
 </html>
