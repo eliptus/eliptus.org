@@ -7,111 +7,73 @@
     <script type="text/javascript" src=".javascripts/fade.js" ></script>
     <script type="text/javascript">
 
-      function eliptus_onmouseover()
-      {
-        var eliptus = this;
+      var Window = window ;
+      var Document = document ;
+      var iEliptus = null ;
 
-        eliptus.src = asImages["onmouseover"];
+      function EliptusOnClick()
+      {
+          iClone = null ;
+          anOffsetCurrent = new Array() ;
+          anOffsetGoal = new Array() ;
+
+          anOffsetCurrent = anOffsetCurrent.concat(fGetWindowOffset(iEliptus)) ;
+          anOffsetCurrent.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
+
+          iClone = iEliptus.cloneNode(true) ;
+          iClone.style.visibility = "hidden" ;
+          iClone.style.position = "fixed" ;
+          iClone.style.left = String(anOffsetCurrent[0]) + "px" ;
+          iClone.style.top = String(anOffsetCurrent[1]) + "px" ;
+          iClone.style.width = String(anOffsetCurrent[2]) + "px" ;
+          iClone.style.height = String(anOffsetCurrent[3]) + "px" ;
+
+          Document.body.appendChild(iClone) ;
+          iClone.style.visibility = "visible" ;
+
+          iEliptus.style.visibility = "hidden" ;
+
+          var debug = Document.getElementById("debug") ;
+
+          if ( null == debug )
+          {
+            debug = Document.createElement("div") ;
+            debug.id = "debug" ;
+            Document.body.appendChild(debug) ;
+          }
+
+          //debug.innerHTML += String(anOffsetCurrent) ;
+
       }
 
-      function eliptus_onmouseout()
+      function EliptusOnFade(aStatus)
       {
-        var eliptus = this;
-
-        eliptus.src = asImages["onmouseout"];
-      }
-
-      function eliptus_onload()
-      {
-        var eliptus = this;
-
-        document.body.style.backgroundColor = asBackgroundColors[eliptus.src] ;
-        document.body.style.color = asColors[eliptus.src] ;
-
-        if ( "black" == document.body.style.backgroundColor )
+        if ( "Complete" == aStatus[1] )
         {
-          Fade(eliptus, 1, 1000) ;
-        }
-        else
-        {
-          Fade(eliptus, 0, 1000) ;
+          iEliptus.onclick = EliptusOnClick ;
         }
       }
 
-      function window_onload()
+      function WindowOnLoad()
       {
-        var eliptus = document.getElementById("ELIPTUS");
+        Window.onload = "" ;
 
-        eliptus.style.opacity = 0 ;
-        eliptus.onmouseover = eliptus_onmouseover;
-        eliptus.onmouseout = eliptus_onmouseout;
-        eliptus.onload = eliptus_onload;
-        eliptus.src = asImages["onload"];
+        iEliptus = Document.getElementById("ELIPTUS") ;
+
+        iEliptus.style.opacity = 0 ;
+        iEliptus.src = ".images/Eliptus Ambigram - Sharp.jpg" ;
+        iEliptus.alt = "ELIPTUS" ;
       }
 
-      var asImages = new Array();
-      var asBackgroundColors = new Array();
-      var asColors = new Array();
-      var iPreload = new Image();
+      function WindowOnMouseOver()
+      {
+        Window.onmouseover = "" ;
 
-<?php
-class cBgInfo_t
-{
-  function __construct
-  (
-    $sImage,
-    $sBackgroundColor,
-    $sColor,
-    $saEvents
-  )
-  {
-    $this->sImage = $sImage;
-    $this->sBackgroundColor = $sBackgroundColor;
-    $this->sColor = $sColor;
-    $this->saEvents = $saEvents;
-  }
-}
+        Fade(iEliptus, 1, 1000, EliptusOnFade) ;
+      }
 
-$acBgInfo = array
-(
-  new cBgInfo_t
-  (
-    ".images/Eliptus Ambigram - Sharp.jpg",
-    "black",
-    "red",
-    array
-    (
-      "onload",
-      "onmouseout"
-    )
-  ),
-  new cBgInfo_t
-  (
-    ".images/Eliptus Ambigram - Inverted.jpg",
-    "red",
-    "black",
-    array
-    (
-      "onmouseover"
-    )
-  ),
-);
-
-while ( 0 < count($acBgInfo) )
-{
-  $cTmpBgInfo = array_shift($acBgInfo);
-  echo "      iPreload.src = \"" . $cTmpBgInfo->sImage . "\";\n";
-  echo "      asBackgroundColors[iPreload.src] = \"" . $cTmpBgInfo->sBackgroundColor . "\";\n";
-  echo "      asColors[iPreload.src] = \"" . $cTmpBgInfo->sColor . "\";\n";
-  while ( 0 < count($cTmpBgInfo->saEvents) )
-  {
-    echo "      asImages[\"" . array_shift($cTmpBgInfo->saEvents) . "\"] = iPreload.src;\n";
-  }
-}
-?>
-
-      window.onload = window_onload;
-      window.onresize = window_onresize;
+      Window.onload = WindowOnLoad ;
+      Window.onmouseover = WindowOnMouseOver ;
 
     </script>
     <title>
@@ -120,7 +82,7 @@ while ( 0 < count($acBgInfo) )
   </head>
   <body>
     <div class="SplashContainer" >
-      <img class="SplashContent" id="ELIPTUS" alt="ELIPTUS" src="" ></img>
+      <img class="SplashContent" id="ELIPTUS" alt="" src="" ></img>
       <span class="SplashVerticalSpacer" ></span>
     </div>
   </body>

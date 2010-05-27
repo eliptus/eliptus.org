@@ -163,3 +163,19 @@ function MoveWork(sElementID)
   }
 }
 
+function fGetWindowOffset(oElement)
+{
+  var oCurrent = oElement ;
+  var nOffsetTop = 0 ;
+  var nOffsetLeft = 0 ;
+
+  while ( null != oCurrent )
+  {
+    nOffsetLeft += oCurrent.offsetLeft ;
+    nOffsetTop += oCurrent.offsetTop ;
+    oCurrent = oCurrent.offsetParent ;
+  }
+
+  return [nOffsetLeft, nOffsetTop] ;
+}
+
