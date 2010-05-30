@@ -14,20 +14,31 @@
       var oSplash = new SplashObject() ;
       var oHeader = new HeaderObject() ;
 
-      function EliptusOnMove(aStatus)
+      function HeaderOnFade(aStatus)
       {
         if ( "Complete" == aStatus[1] )
         {
-          iEliptus.style.visibility = "visible" ;
           iClone.style.visibility = "hidden" ;
-
           Document.body.removeChild(iClone) ;
           delete iClone ;
         }
       }
 
+      function CloneOnMove(aStatus)
+      {
+        if ( "Complete" == aStatus[1] )
+        {
+          oHeader.Element.style.opacity = 0 ;
+          oHeader.Element.style.visibility = "visible" ;
+
+          Fade(oHeader.Element, 1, 1000, HeaderOnFade) ;
+        }
+      }
+
       function EliptusOnClick()
       {
+        iEliptus.onclick = null ;
+
         iClone = null ;
         anOffsetCurrent = new Array() ;
         anOffsetGoal = new Array() ;
@@ -44,19 +55,19 @@
         iClone.style.width = String(anOffsetCurrent[2]) + "px" ;
         iClone.style.height = String(anOffsetCurrent[3]) + "px" ;
         Document.body.appendChild(iClone) ;
-
         iClone.style.visibility = "visible" ;
-        iEliptus.style.visibility = "hidden" ;
+
+        oSplash.Element.style.visibility = "hidden" ;
 
         oHeader.ContentSet(iEliptus) ;
 
         anOffsetGoal = anOffsetGoal.concat(fGetWindowOffset(iEliptus)) ;
         anOffsetGoal.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
 
-        Move(iClone, String(anOffsetGoal[0]) + "px", String(anOffsetGoal[1]) + "px", String(anOffsetGoal[2]) + "px", String(anOffsetGoal[3]) + "px", 1000, EliptusOnMove) ;
+        Move(iClone, String(anOffsetGoal[0]) + "px", String(anOffsetGoal[1]) + "px", String(anOffsetGoal[2]) + "px", String(anOffsetGoal[3]) + "px", 1000, CloneOnMove) ;
       }
 
-      function EliptusOnFade(aStatus)
+      function SplashOnFade(aStatus)
       {
         if ( "Complete" == aStatus[1] )
         {
@@ -66,7 +77,7 @@
 
       function WindowOnLoad()
       {
-        Window.onload = "" ;
+        Window.onload = null ;
 
         oHeader.Add(Document.body) ;
         oSplash.Add(Document.body) ;
@@ -74,19 +85,24 @@
 
       function WindowOnMouseOver()
       {
-        Window.onmouseover = "" ;
+        Window.onmouseover = null ;
 
-        Fade(iEliptus, 1, 1000, EliptusOnFade) ;
+        oSplash.Element.style.opacity = 0 ;
+        oSplash.Element.style.visibility = "visible" ;
+
+        Fade(oSplash.Element, 1, 1000, SplashOnFade) ;
       }
 
       Window.onload = WindowOnLoad ;
       Window.onmouseover = WindowOnMouseOver ;
 
       iEliptus.id = "ELIPTUS" ;
-      iEliptus.style.opacity = 0 ;
       iEliptus.src = ".images/Eliptus Ambigram - Sharp.jpg" ;
       iEliptus.alt = "ELIPTUS" ;
 
+      oHeader.Element.style.visibility = "hidden" ;
+
+      oSplash.Element.style.visibility = "hidden" ;
       oSplash.ContentSet(iEliptus) ;
 
     </script>

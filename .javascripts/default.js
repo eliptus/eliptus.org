@@ -168,13 +168,18 @@ function fGetWindowOffset(oElement)
   return [nOffsetLeft, nOffsetTop] ;
 }
 
+var gaoHeaders = new Array() ;
+
 function HeaderObject()
 {
+  this.Index = gaoHeaders.push(this) - 1 ;
+
   this.ContentSet = _HeaderContentSet ;
   this.Add = _HeaderAdd ;
 
   this.Element = Document.createElement("div") ;
   this.Element.className = "HeaderContainer"
+  this.Element.id = this.Element.className + this.Index ;
 }
 
 function _HeaderContentSet(eContent)
