@@ -81,12 +81,27 @@
 
         oHeader.Add(Document.body) ;
         oSplash.Add(Document.body) ;
+
+        Window.onmouseover = WindowOnMouseOver ;
+        Window.onclick = WindowOnClick ;
       }
 
       function WindowOnMouseOver()
       {
         Window.onmouseover = null ;
 
+        SplashFadeIn() ;
+      }
+
+      function WindowOnClick()
+      {
+        Window.onclick = null ;
+
+        SplashFadeIn() ;
+      }
+
+      function SplashFadeIn()
+      {
         oSplash.Element.style.opacity = 0 ;
         oSplash.Element.style.visibility = "visible" ;
 
@@ -94,7 +109,6 @@
       }
 
       Window.onload = WindowOnLoad ;
-      Window.onmouseover = WindowOnMouseOver ;
 
       iEliptus.id = "ELIPTUS" ;
       iEliptus.src = ".images/Eliptus Ambigram - Sharp.jpg" ;
