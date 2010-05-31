@@ -1,155 +1,209 @@
-var gaoMoves = new Array() ;
+function StateObject()
+{
+  var This = this ;
+  var sStateCurrent = null ;
+
+  function _Change(sStateOld, sStateNew)
+  {
+    var err = 0 ;
+
+    if ( !err )
+    {
+      if ( sStateCurrent != sStateOld )
+      {
+        err = -1 ;
+      }
+    }
+
+
+    if ( !err )
+    {
+      if ( null == This.afHandlers[sStateNew] )
+      {
+        err = -1 ;
+      }
+    }
+
+    if ( !err )
+    {
+      sStateCurrent = This.afHandlers[sStateNew](sStateOld, sStateNew) ;
+      if ( sStateCurrent != sStateNew )
+      {
+        err = -1 ;
+      }
+    }
+  }
+
+  function _NewTrigger(sStateOld, sStateNew)
+  {
+    return function(){This.Change(sStateOld,sStateNew);} ;
+  }
+
+  This.afHandlers = new Array() ;
+
+  This.Change = _Change ;
+  This.NewTrigger = _NewTrigger ;
+}
 
 function MoveObject()
 {
-}
+  var This = this ;
+  var oInterval = null ;
+  var nXGoal = null ;
+  var nYGoal = null ;
+  var nWidthGoal = null ;
+  var nHeightGoal = null ;
+  var nTimeStarted = null ;
 
-function Move(what, nXGoal, nYGoal, nWidthGoal, nHeightGoal, nTimeToMove, fCallback, vArg)
-{
-  var sElementID ;
-  var oMove ;
-  var eClone ;
-
-  sElementID = what.id ;
-
-  if ( null == gaoMoves[sElementID] )
+  function _Execute()
   {
-    gaoMoves[sElementID] = new MoveObject() ;
+    var eClone ;
+
+    if ( null != oInterval )
+    {
+      clearInterval(oInterval) ;
+      delete oInterval ;
+      oInterval = null ;
+    }
+
+    if ( null == This.nTimeToMove )
+    {
+      This.nTimeToMove = 0 ;
+    }
+
+    eClone = This.Element.cloneNode(true) ;
+    eClone.style.visibility = "hidden" ;
+    This.Element.parentNode.appendChild(eClone) ;
+    if ( null != This.sXGoal )
+    {
+      eClone.style.left = This.sXGoal ;
+      nXGoal = eClone.offsetLeft ;
+    }
+    if ( null != This.sYGoal )
+    {
+      eClone.style.top = This.sYGoal ;
+      nYGoal = eClone.offsetTop ;
+    }
+    if ( null != This.sWidthGoal )
+    {
+      eClone.style.width = This.sWidthGoal ;
+      nWidthGoal = eClone.offsetWidth ;
+    }
+    if ( null != This.sHeightGoal )
+    {
+      eClone.style.height = This.sHeightGoal ;
+      nHeightGoal = eClone.offsetHeight ;
+    }
+    This.Element.parentNode.removeChild(eClone) ;
+    delete eClone ;
+
+    nTimeStarted = new Date().getTime() ;
+    oInterval = setInterval(_Work, 30) ;
+
+    _Work() ;
   }
 
-  oMove = gaoMoves[sElementID] ;
-
-  if ( null != oMove.oInterval )
+  function _Work()
   {
-    clearInterval(oMove.oInterval) ;
-    delete oMove.oInterval ;
+    var nTimeCurrent ;
+    var nTimeElapsed ;
+    var nXStep ;
+    var nYStep ;
+    var nWidthStep ;
+    var nHeightStep ;
+
+    nTimeCurrent = new Date().getTime() ;
+    nTimeElapsed = nTimeCurrent - nTimeStarted ;
+
+    if ( nTimeElapsed < This.nTimeToMove )
+    {
+      if ( null != nXGoal )
+      {
+        nXStep = nXGoal - This.Element.offsetLeft ;
+        nXStep *= ( nTimeElapsed ) / This.nTimeToMove ;
+        This.Element.style.left = String(nXStep + This.Element.offsetLeft) + 'px' ;
+      }
+      if ( null != nYGoal )
+      {
+        nYStep = nYGoal - This.Element.offsetTop ;
+        nYStep *= ( nTimeElapsed ) / This.nTimeToMove ;
+        This.Element.style.top = String(nYStep + This.Element.offsetTop) + 'px' ;
+      }
+      if ( null != nWidthGoal )
+      {
+        nWidthStep = nWidthGoal - This.Element.offsetWidth ;
+        nWidthStep *= ( nTimeElapsed ) / This.nTimeToMove ;
+        This.Element.style.width = String(nWidthStep + This.Element.offsetWidth) + 'px';
+      }
+      if ( null != nHeightGoal )
+      {
+        nHeightStep = nHeightGoal - This.Element.offsetHeight ;
+        nHeightStep *= ( nTimeElapsed ) / This.nTimeToMove ;
+        This.Element.style.height = String(nHeightStep + This.Element.offsetHeight) + 'px';
+      }
+
+      This.nTimeToMove -= nTimeElapsed ;
+      nTimeStarted = nTimeCurrent ;
+
+      if ( null != This.fUpdate )
+      {
+        if ( "function" == typeof(This.fUpdate) )
+        {
+          This.fUpdate() ;
+        }
+        else
+        {
+          eval(This.fUpdate) ;
+        }
+      }
+    }
+    else
+    {
+      clearInterval(oInterval) ;
+      delete oInterval ;
+      oInterval = null ;
+
+      if ( null != nXGoal )
+      {
+        This.Element.style.left = String(nXGoal) + 'px' ;
+      }
+      if ( null != nYGoal )
+      {
+        This.Element.style.top = String(nYGoal) + 'px' ;
+      }
+      if ( null != nWidthGoal )
+      {
+        This.Element.style.width = String(nWidthGoal) + 'px';
+      }
+      if ( null != nHeightGoal )
+      {
+        This.Element.style.height = String(nHeightGoal) + 'px';
+      }
+
+      if ( null != This.fComplete )
+      {
+        if ( "function" == typeof(This.fComplete) )
+        {
+          This.fComplete() ;
+        }
+        else
+        {
+          eval(This.fComplete) ;
+        }
+      }
+    }
   }
 
-  eClone = what.cloneNode(true) ;
-  eClone.style.visibility = "hidden" ;
-  what.parentNode.appendChild(eClone) ;
-  if ( null != nXGoal )
-  {
-    eClone.style.left = nXGoal ;
-    nXGoal = eClone.offsetLeft ;
-  }
-  if ( null != nYGoal )
-  {
-    eClone.style.top = nYGoal ;
-    nYGoal = eClone.offsetTop ;
-  }
-  if ( null != nWidthGoal )
-  {
-    eClone.style.width = nWidthGoal ;
-    nWidthGoal = eClone.offsetWidth ;
-  }
-  if ( null != nHeightGoal )
-  {
-    eClone.style.height = nHeightGoal ;
-    nHeightGoal = eClone.offsetHeight ;
-  }
-  what.parentNode.removeChild(eClone) ;
-  delete eClone ;
+  This.Element = null ;
+  This.sXGoal = null ;
+  This.sYGoal = null ;
+  This.sWidthGoal = null ;
+  This.sHeightGoal = null ;
+  This.nTimeToMove = null ;
+  This.fUpdate = null ;
+  This.fComplete = null ;
 
-  if ( null == nTimeToMove )
-  {
-    nTimeToMove = 0 ;
-  }
-
-  oMove.nXGoal = nXGoal ;
-  oMove.nYGoal = nYGoal ;
-  oMove.nWidthGoal = nWidthGoal ;
-  oMove.nHeightGoal = nHeightGoal ;
-  oMove.nTimeToMove = nTimeToMove ;
-  oMove.fCallback = fCallback ;
-  oMove.vArg = vArg ;
-  oMove.nTimeStarted = new Date().getTime() ;
-  oMove.oInterval = setInterval('MoveWork("' + sElementID + '")', 30) ;
-
-  MoveWork(sElementID) ;
-}
-
-function MoveWork(sElementID)
-{
-  var what ;
-  var oMove ;
-  var nTimeCurrent ;
-  var nTimeElapsed ;
-  var nXStep ;
-  var nYStep ;
-  var nWidthStep ;
-  var nHeightStep ;
-
-  what = document.getElementById(sElementID) ;
-  oMove = gaoMoves[sElementID] ;
-
-  nTimeCurrent = new Date().getTime() ;
-  nTimeElapsed = nTimeCurrent - oMove.nTimeStarted ;
-
-  if ( nTimeElapsed < oMove.nTimeToMove )
-  {
-    if ( null != oMove.nXGoal )
-    {
-      nXStep = oMove.nXGoal - what.offsetLeft ;
-      nXStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-      what.style.left = String(nXStep + what.offsetLeft) + 'px' ;
-    }
-    if ( null != oMove.nYGoal )
-    {
-      nYStep = oMove.nYGoal - what.offsetTop ;
-      nYStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-      what.style.top = String(nYStep + what.offsetTop) + 'px' ;
-    }
-    if ( null != oMove.nWidthGoal )
-    {
-      nWidthStep = oMove.nWidthGoal - what.offsetWidth ;
-      nWidthStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-      what.style.width = String(nWidthStep + what.offsetWidth) + 'px';
-    }
-    if ( null != oMove.nHeightGoal )
-    {
-      nHeightStep = oMove.nHeightGoal - what.offsetHeight ;
-      nHeightStep *= ( nTimeElapsed ) / oMove.nTimeToMove ;
-      what.style.height = String(nHeightStep + what.offsetHeight) + 'px';
-    }
-
-    oMove.nTimeToMove -= nTimeElapsed ;
-    oMove.nTimeStarted = nTimeCurrent ;
-
-    if ( null != oMove.fCallback )
-    {
-      oMove.fCallback(new Array("Move", "Pending"), oMove.vArg) ;
-    }
-  }
-  else
-  {
-    clearInterval(oMove.oInterval) ;
-    delete oMove.oInterval ;
-
-    if ( null != oMove.nXGoal )
-    {
-      what.style.left = String(oMove.nXGoal) + 'px' ;
-    }
-    if ( null != oMove.nYGoal )
-    {
-      what.style.top = String(oMove.nYGoal) + 'px' ;
-    }
-    if ( null != oMove.nWidthGoal )
-    {
-      what.style.width = String(oMove.nWidthGoal) + 'px';
-    }
-    if ( null != oMove.nHeightGoal )
-    {
-      what.style.height = String(oMove.nHeightGoal) + 'px';
-    }
-
-    if ( null != oMove.fCallback )
-    {
-      oMove.fCallback(new Array("Move", "Complete"), oMove.vArg) ;
-      delete oMove.fCallback ;
-      delete oMove.vArg ;
-    }
-  }
+  This.Execute = _Execute ;
 }
 
 function fGetWindowOffset(oElement)
@@ -168,11 +222,11 @@ function fGetWindowOffset(oElement)
   return [nOffsetLeft, nOffsetTop] ;
 }
 
-var gaoHeaders = new Array() ;
+var gnHeaders = 0 ;
 
 function HeaderObject()
 {
-  this.Index = gaoHeaders.push(this) - 1 ;
+  this.Index = gnHeaders++ ;
 
   this.ContentSet = _HeaderContentSet ;
   this.Add = _HeaderAdd ;

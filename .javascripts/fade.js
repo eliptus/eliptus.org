@@ -1,89 +1,94 @@
-var gaoFades = new Array() ;
-
 function FadeObject()
 {
-}
+  var This = this ;
+  var oInterval = null ;
+  var nOpacityGoal = null ;
+  var nTimeStarted = null ;
 
-function Fade(what, nOpacityGoal, nTimeToFade, fCallback, vArg)
-{
-  var sElementID ;
-  var oFade ;
-
-  sElementID = what.id ;
-
-  if ( null == gaoFades[sElementID] )
+  function _Execute()
   {
-    gaoFades[sElementID] = new FadeObject() ;
-  }
-
-  oFade = gaoFades[sElementID] ;
-
-  if ( null != oFade.oInterval )
-  {
-    clearInterval(oFade.oInterval) ;
-    delete oFade.oInterval ;
-  }
-  else if ( '' == what.style.opacity)
-  {
-    what.style.opacity = 1 ;
-  }
-
-  if ( null == nTimeToFade )
-  {
-    nTimeToFade = 0 ;
-  }
-
-  oFade.nOpacityGoal = nOpacityGoal ;
-  oFade.nTimeToFade = nTimeToFade ;
-  oFade.fCallback = fCallback ;
-  oFade.vArg = vArg ;
-  oFade.nTimeStarted = new Date().getTime() ;
-  oFade.oInterval = setInterval('FadeWork("' + sElementID + '")', 30) ;
-
-  FadeWork(sElementID) ;
-}
-
-function FadeWork(sElementID)
-{
-  var what ;
-  var oFade ;
-  var nTimeCurrent ;
-  var nTimeElapsed ;
-  var nOpacityStep ;
-
-  what = document.getElementById(sElementID) ;
-  oFade = gaoFades[sElementID] ;
-
-  nTimeCurrent = new Date().getTime() ;
-  nTimeElapsed = nTimeCurrent - oFade.nTimeStarted ;
-
-  if ( nTimeElapsed < oFade.nTimeToFade )
-  {
-    nOpacityStep = oFade.nOpacityGoal - what.style.opacity ;
-    nOpacityStep *= ( nTimeElapsed ) / oFade.nTimeToFade ;
-
-    oFade.nTimeToFade -= nTimeElapsed ;
-    oFade.nTimeStarted = nTimeCurrent ;
-
-    what.style.opacity = Number(what.style.opacity) + nOpacityStep ;
-
-    if ( null != oFade.fCallback )
+    if ( null != oInterval )
     {
-      oFade.fCallback(new Array("Fade", "Pending"), oFade.vArg) ;
+      clearInterval(oInterval) ;
+      delete oInterval ;
+      oInterval = null ;
+    }
+    else if ( '' == This.Element.style.opacity)
+    {
+      This.Element.style.opacity = 1 ;
+    }
+
+    if ( null == This.nTimeToFade )
+    {
+      This.nTimeToFade = 0 ;
+    }
+
+    nOpacityGoal = This.nOpacityGoal ;
+
+    nTimeStarted = new Date().getTime() ;
+    oInterval = setInterval(_Work, 30) ;
+
+    _Work() ;
+  }
+
+  function _Work()
+  {
+    var nTimeCurrent ;
+    var nTimeElapsed ;
+    var nOpacityStep ;
+
+    nTimeCurrent = new Date().getTime() ;
+    nTimeElapsed = nTimeCurrent - nTimeStarted ;
+
+    if ( nTimeElapsed < This.nTimeToFade )
+    {
+      nOpacityStep = nOpacityGoal - This.Element.style.opacity ;
+      nOpacityStep *= ( nTimeElapsed ) / This.nTimeToFade ;
+      This.Element.style.opacity = Number(This.Element.style.opacity) + nOpacityStep ;
+
+      This.nTimeToFade -= nTimeElapsed ;
+      nTimeStarted = nTimeCurrent ;
+
+      if ( null != This.fUpdate )
+      {
+        if ( "function" == typeof(This.fUpdate) )
+        {
+          This.fUpdate() ;
+        }
+        else
+        {
+          eval(This.fUpdate) ;
+        }
+      }
+    }
+    else
+    {
+      clearInterval(oInterval) ;
+      delete oInterval ;
+      oInterval = null ;
+
+      This.Element.style.opacity = nOpacityGoal ;
+
+      if ( null != This.fComplete )
+      {
+        if ( "function" == typeof(This.fComplete) )
+        {
+          This.fComplete() ;
+        }
+        else
+        {
+          eval(This.fComplete) ;
+        }
+      }
     }
   }
-  else
-  {
-    clearInterval(oFade.oInterval) ;
-    delete oFade.oInterval ;
 
-    what.style.opacity = oFade.nOpacityGoal ;
+  This.Element = null ;
+  This.nOpacityGoal = null ;
+  This.nTimeToFade = null ;
+  This.fUpdate = null ;
+  This.fComplete = null ;
 
-    if ( null != oFade.fCallback )
-    {
-      oFade.fCallback(new Array("Fade", "Complete"), oFade.vArg) ;
-      delete oFade.fCallback ;
-      delete oFade.vArg ;
-    }
-  }
+  This.Execute = _Execute ;
 }
+

@@ -10,32 +10,57 @@
 
       var Window = window ;
       var Document = document ;
+      var oState = new StateObject() ;
       var iEliptus = new Image() ;
       var oSplash = new SplashObject() ;
       var oHeader = new HeaderObject() ;
+      var oFader = new FadeObject() ;
+      var oMover = new MoveObject() ;
 
-      function HeaderOnFade(aStatus)
+      oState.afHandlers["WINDOW_LOADING"] = function (sStateCurrent, sStateNew)
       {
-        if ( "Complete" == aStatus[1] )
-        {
-          iClone.style.visibility = "hidden" ;
-          Document.body.removeChild(iClone) ;
-          delete iClone ;
-        }
+        Window.onload = oState.NewTrigger(sStateNew, "SPLASH_TRANSPARENT") ;
+
+        return sStateNew ;
       }
 
-      function CloneOnMove(aStatus)
+      oState.afHandlers["SPLASH_TRANSPARENT"] = function (sStateCurrent, sStateNew)
       {
-        if ( "Complete" == aStatus[1] )
-        {
-          oHeader.Element.style.opacity = 0 ;
-          oHeader.Element.style.visibility = "visible" ;
+        Window.onload = null ;
+        oHeader.Add(Document.body) ;
+        oSplash.Add(Document.body) ;
 
-          Fade(oHeader.Element, 1, 1000, HeaderOnFade) ;
-        }
+        Window.onmouseover = oState.NewTrigger(sStateNew, "SPLASH_FADING_IN") ;
+        Window.onclick = oState.NewTrigger(sStateNew, "SPLASH_FADING_IN") ;
+
+        return sStateNew ;
       }
 
-      function EliptusOnClick()
+      oState.afHandlers["SPLASH_FADING_IN"] = function (sStateCurrent, sStateNew)
+      {
+        Window.onmouseover = null ;
+        Window.onclick = null ;
+
+        oSplash.Element.style.opacity = 0 ;
+        oSplash.Element.style.visibility = "visible" ;
+
+        oFader.Element = oSplash.Element ;
+        oFader.nOpacityGoal = 1 ;
+        oFader.nTimeToFade = 1000 ;
+        oFader.fComplete = oState.NewTrigger(sStateNew, "SPLASH_OPAQUE") ;
+        oFader.Execute() ;
+
+        return sStateNew ;
+      }
+
+      oState.afHandlers["SPLASH_OPAQUE"] = function (sStateCurrent, sStateNew)
+      {
+        iEliptus.onclick = oState.NewTrigger(sStateNew, "SPLASH_HEADER_TRANSITION") ;
+
+        return sStateNew ;
+      }
+
+      oState.afHandlers["SPLASH_HEADER_TRANSITION"] = function (sStateCurrent, sStateNew)
       {
         iEliptus.onclick = null ;
 
@@ -64,51 +89,40 @@
         anOffsetGoal = anOffsetGoal.concat(fGetWindowOffset(iEliptus)) ;
         anOffsetGoal.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
 
-        Move(iClone, String(anOffsetGoal[0]) + "px", String(anOffsetGoal[1]) + "px", String(anOffsetGoal[2]) + "px", String(anOffsetGoal[3]) + "px", 1000, CloneOnMove) ;
+        oMover.Element = iClone ;
+        oMover.sXGoal = String(anOffsetGoal[0]) + "px" ;
+        oMover.sYGoal = String(anOffsetGoal[1]) + "px" ;
+        oMover.sWidthGoal = String(anOffsetGoal[2]) + "px" ;
+        oMover.sHeightGoal = String(anOffsetGoal[3]) + "px" ;
+        oMover.nTimeToMove = 1000 ;
+        oMover.fComplete = oState.NewTrigger(sStateNew, "HEADER_FADING_IN") ;
+        oMover.Execute() ;
+
+        return sStateNew ;
       }
 
-      function SplashOnFade(aStatus)
+      oState.afHandlers["HEADER_FADING_IN"] = function (sStateCurrent, sStateNew)
       {
-        if ( "Complete" == aStatus[1] )
-        {
-          iEliptus.onclick = EliptusOnClick ;
-        }
+        oHeader.Element.style.opacity = 0 ;
+        oHeader.Element.style.visibility = "visible" ;
+
+        oFader.Element = oHeader.Element ;
+        oFader.nOpacityGoal = 1 ;
+        oFader.nTimeToFade = 1000 ;
+        oFader.fComplete = oState.NewTrigger(sStateNew, "HEADER_OPAQUE") ;
+        oFader.Execute() ;
+
+        return sStateNew ;
       }
 
-      function WindowOnLoad()
+      oState.afHandlers["HEADER_OPAQUE"] = function (sStateCurrent, sStateNew)
       {
-        Window.onload = null ;
+        iClone.style.visibility = "hidden" ;
+        Document.body.removeChild(iClone) ;
+        delete iClone ;
 
-        oHeader.Add(Document.body) ;
-        oSplash.Add(Document.body) ;
-
-        Window.onmouseover = WindowOnMouseOver ;
-        Window.onclick = WindowOnClick ;
+        return sStateNew ;
       }
-
-      function WindowOnMouseOver()
-      {
-        Window.onmouseover = null ;
-
-        SplashFadeIn() ;
-      }
-
-      function WindowOnClick()
-      {
-        Window.onclick = null ;
-
-        SplashFadeIn() ;
-      }
-
-      function SplashFadeIn()
-      {
-        oSplash.Element.style.opacity = 0 ;
-        oSplash.Element.style.visibility = "visible" ;
-
-        Fade(oSplash.Element, 1, 1000, SplashOnFade) ;
-      }
-
-      Window.onload = WindowOnLoad ;
 
       iEliptus.id = "ELIPTUS" ;
       iEliptus.src = ".images/Eliptus Ambigram - Sharp.jpg" ;
@@ -118,6 +132,8 @@
 
       oSplash.Element.style.visibility = "hidden" ;
       oSplash.ContentSet(iEliptus) ;
+
+      oState.NewTrigger(null, "WINDOW_LOADING")() ;
 
     </script>
     <title>

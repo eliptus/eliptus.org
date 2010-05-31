@@ -1,10 +1,10 @@
-var gaoSplashes = new Array() ;
+var gnSplashes = 0 ;
 
 function SplashObject()
 {
   var eTemp = null ;
 
-  this.Index = gaoSplashes.push(this) - 1 ;
+  this.Index = gnSplashes++ ;
 
   this.ContentSet = _SplashContentSet ;
   this.Add = _SplashAdd ;
