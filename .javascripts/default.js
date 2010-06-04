@@ -226,34 +226,35 @@ var gnHeaders = 0 ;
 
 function HeaderObject()
 {
-  this.Index = gnHeaders++ ;
+  var This = this ;
+  var nIndex = gnHeaders++ ;
 
-  this.ContentSet = _HeaderContentSet ;
-  this.Add = _HeaderAdd ;
-
-  this.Element = Document.createElement("div") ;
-  this.Element.className = "HeaderContainer"
-  this.Element.id = this.Element.className + this.Index ;
-}
-
-function _HeaderContentSet(eContent)
-{
-  var eFirstChild = this.Element.firstChild ;
-
-  eContent.className = "HeaderContent" ;
-
-  if ( null == eFirstChild )
+  function _ContentSet(eContent)
   {
-    this.Element.appendChild(eContent) ;
-  }
-  else
-  {
-    this.Element.replaceChild(eContent, eFirstChild) ;
-  }
-}
+    var eFirstChild = This.Element.firstChild ;
 
-function _HeaderAdd(eParent)
-{
-  eParent.appendChild(this.Element) ;
+    eContent.className = "HeaderContent" ;
+
+    if ( null == eFirstChild )
+    {
+      This.Element.appendChild(eContent) ;
+    }
+    else
+    {
+      This.Element.replaceChild(eContent, eFirstChild) ;
+    }
+  }
+
+  function _Add(eParent)
+  {
+    eParent.appendChild(This.Element) ;
+  }
+
+  This.Element = Document.createElement("div") ;
+  This.Element.className = "HeaderContainer"
+  This.Element.id = This.Element.className + This.Index ;
+
+  This.ContentSet = _ContentSet ;
+  This.Add = _Add ;
 }
 

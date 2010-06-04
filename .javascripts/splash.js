@@ -2,41 +2,41 @@ var gnSplashes = 0 ;
 
 function SplashObject()
 {
+  var This = this ;
+  var nIndex = gnSplashes++ ;
   var eTemp = null ;
 
-  this.Index = gnSplashes++ ;
+  function _ContentSet(eContent)
+  {
+    var eFirstChild = This.Element.firstChild ;
 
-  this.ContentSet = _SplashContentSet ;
-  this.Add = _SplashAdd ;
+    eContent.className = "SplashContent" ;
 
-  this.Element = Document.createElement("div") ;
-  this.Element.className = "SplashContainer" ;
-  this.Element.id = this.Element.className + this.Index ;
+    if ( "SplashContent" == eFirstChild.className )
+    {
+      This.Element.replaceChild(eContent, eFirstChild) ;
+    }
+    else
+    {
+      This.Element.insertBefore(eContent, eFirstChild) ;
+    }
+  }
+
+  function _Add(eParent)
+  {
+    eParent.appendChild(This.Element) ;
+  }
+
+  This.Element = Document.createElement("div") ;
+  This.Element.className = "SplashContainer" ;
+  This.Element.id = This.Element.className + This.Index ;
 
   eTemp = Document.createElement("span") ;
   eTemp.className = "SplashVerticalSpacer" ;
-  eTemp.id = eTemp.className + this.Index ;
-  this.Element.appendChild(eTemp) ;
-}
+  eTemp.id = eTemp.className + This.Index ;
+  This.Element.appendChild(eTemp) ;
 
-function _SplashContentSet(eContent)
-{
-  var eFirstChild = this.Element.firstChild ;
-
-  eContent.className = "SplashContent" ;
-
-  if ( "SplashContent" == eFirstChild.className )
-  {
-    this.Element.replaceChild(eContent, eFirstChild) ;
-  }
-  else
-  {
-    this.Element.insertBefore(eContent, eFirstChild) ;
-  }
-}
-
-function _SplashAdd(eParent)
-{
-  eParent.appendChild(this.Element) ;
+  This.ContentSet = _ContentSet ;
+  This.Add = _Add ;
 }
 
