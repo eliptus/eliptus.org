@@ -222,6 +222,22 @@ function fGetWindowOffset(oElement)
   return [nOffsetLeft, nOffsetTop] ;
 }
 
+function fGetStyle(oElement, sProperty)
+{
+    var sValue
+
+    if ( oElement.currentStyle )
+    {
+        sValue = oElement.currentStyle[sProperty];
+    }
+    else if ( window.getComputedStyle )
+    {
+        sValue = document.defaultView.getComputedStyle(oElement,null).getPropertyValue(sProperty);
+    }
+
+    return sValue;
+}
+
 var gnHeaders = 0 ;
 
 function HeaderObject()
@@ -256,5 +272,138 @@ function HeaderObject()
 
   This.ContentSet = _ContentSet ;
   This.Add = _Add ;
+}
+
+function TerminalObject()
+{
+  var This = this ;
+  var eText = null ;
+  var eCursor = null ;
+  var sTextInput = '' ;
+  var oTextInterval = null ;
+  var oCursorInterval = null ;
+
+  eText = Document.createElement("span") ;
+  eText.className = "TerminalText" ;
+
+  eCursor = Document.createElement("span") ;
+  eCursor.className = "TerminalCursor" ;
+  eCursor.innerHTML = "_" ;
+
+  function _TypeWork()
+  {
+    eText.innerHTML += sTextInput.substring(0,1) ;
+    sTextInput = sTextInput.substring(1) ;
+    if ( '' != sTextInput )
+    {
+      if ( null != This.fUpdate )
+      {
+        if ( "function" == typeof(This.fUpdate) )
+        {
+          This.fUpdate() ;
+        }
+        else
+        {
+          eval(This.fUpdate) ;
+        }
+      }
+    }
+    else
+    {
+      clearInterval(oTextInterval) ;
+      delete oTextInterval ;
+      oTextInterval = null ;
+
+      if ( null != This.fComplete )
+      {
+        if ( "function" == typeof(This.fComplete) )
+        {
+          This.fComplete() ;
+        }
+        else
+        {
+          eval(This.fComplete) ;
+        }
+      }
+    }
+  }
+
+  function _CursorToggle()
+  {
+    if ( "hidden" != eCursor.style.visibility )
+    {
+      eCursor.style.visibility = "hidden" ;
+    }
+    else
+    {
+      eCursor.style.visibility = "visible" ;
+    }
+  }
+
+  This.Element = Document.createElement("span") ;
+  This.Element.className = "TerminalContainer"
+  This.Element.appendChild(eText) ;
+  This.Element.appendChild(eCursor) ;
+
+  This.fUpdate = null ;
+  This.fComplete = null ;
+
+  This.Add = function (eParent)
+  {
+    eParent.appendChild(This.Element) ;
+    eCursor.style.backgroundColor = fGetStyle(This.Element, "color") ;
+  }
+
+  This.Type = function (sInput)
+  {
+    sTextInput += sInput ;
+
+    if ( ('' != sTextInput) && (null == oTextInterval) )
+    {
+      oTextInterval = setInterval(_TypeWork, 100) ;
+    }
+  }
+
+  This.Clear = function ()
+  {
+    if ( null != oTextInterval )
+    {
+      clearInterval(oTextInterval) ;
+      delete oTextInterval ;
+      oTextInterval = null ;
+    }
+
+    sTextInput = '' ;
+    eText.innerHTML = '' ;
+  }
+
+  This.Cursor = function (sState)
+  {
+    if ( null != oCursorInterval )
+    {
+      clearInterval(oCursorInterval) ;
+      delete oCursorInterval ;
+      oCursorInterval = null ;
+    }
+
+    switch ( sState )
+    {
+      case "Visible" :
+        eCursor.style.visibility = "visible" ;
+        break ;
+
+      case "Hidden" :
+        eCursor.style.visibility = "hidden" ;
+        break ;
+
+      case "Toggle" :
+        _CursorToggle() ;
+        break ;
+
+      case "Blink" :
+        oCursorInterval = setInterval(_CursorToggle, 500) ;
+        break ;
+    }
+  }
 }
 

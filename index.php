@@ -16,6 +16,9 @@
       var oHeader = new HeaderObject() ;
       var oFader = new FadeObject() ;
       var oMover = new MoveObject() ;
+      var oTerminal = new TerminalObject() ;
+      var nStateRepeat = 0 ;
+      var oHintTimeout = null ;
 
       oState.afHandlers["WINDOW_LOADING"] = function (sStateCurrent, sStateNew)
       {
@@ -26,12 +29,43 @@
 
       oState.afHandlers["SPLASH_TRANSPARENT"] = function (sStateCurrent, sStateNew)
       {
-        Window.onload = null ;
-        oHeader.Add(Document.body) ;
-        oSplash.Add(Document.body) ;
+        if ( sStateCurrent != sStateNew )
+        {
+          nStateRepeat = 0 ;
+        }
+        else
+        {
+          nStateRepeat++ ;
+        }
 
-        Window.onmouseover = oState.NewTrigger(sStateNew, "SPLASH_FADING_IN") ;
-        Window.onclick = oState.NewTrigger(sStateNew, "SPLASH_FADING_IN") ;
+        if ( 0 == nStateRepeat )
+        {
+          Window.onload = null ;
+
+          oTerminal.Add(Document.body) ;
+          oHeader.Add(Document.body) ;
+          oSplash.Add(Document.body) ;
+
+          Window.onmouseover = oState.NewTrigger(sStateNew, "SPLASH_FADING_IN") ;
+          Window.onclick = oState.NewTrigger(sStateNew, "SPLASH_FADING_IN") ;
+          oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 5000) ;
+        }
+        else if ( 1 == nStateRepeat )
+        {
+          oTerminal.Cursor("Blink") ;
+          oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 2500) ;
+        }
+        else if ( 2 == nStateRepeat )
+        {
+          oTerminal.Cursor("Visible") ;
+          oTerminal.fComplete = oState.NewTrigger(sStateNew, sStateNew) ;
+          oTerminal.Type("Mouse-over or click the window...") ;
+        }
+        else if ( 3 == nStateRepeat )
+        {
+          oTerminal.fComplete = null ;
+          oTerminal.Cursor("Blink") ;
+        }
 
         return sStateNew ;
       }
@@ -40,6 +74,9 @@
       {
         Window.onmouseover = null ;
         Window.onclick = null ;
+
+        oTerminal.Cursor("Hidden") ;
+        oTerminal.Clear() ;
 
         oSplash.Element.style.opacity = 0 ;
         oSplash.Element.style.visibility = "visible" ;
@@ -55,7 +92,36 @@
 
       oState.afHandlers["SPLASH_OPAQUE"] = function (sStateCurrent, sStateNew)
       {
-        iEliptus.onclick = oState.NewTrigger(sStateNew, "SPLASH_HEADER_TRANSITION") ;
+        if ( sStateCurrent != sStateNew )
+        {
+          nStateRepeat = 0 ;
+        }
+        else
+        {
+          nStateRepeat++ ;
+        }
+
+        if ( 0 == nStateRepeat )
+        {
+          iEliptus.onclick = oState.NewTrigger(sStateNew, "SPLASH_HEADER_TRANSITION") ;
+          oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 5000) ;
+        }
+        else if ( 1 == nStateRepeat )
+        {
+          oTerminal.Cursor("Blink") ;
+          oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 2500) ;
+        }
+        else if ( 2 == nStateRepeat )
+        {
+          oTerminal.Cursor("Visible") ;
+          oTerminal.fComplete = oState.NewTrigger(sStateNew, sStateNew) ;
+          oTerminal.Type("Click the image...") ;
+        }
+        else if ( 3 == nStateRepeat )
+        {
+          oTerminal.fComplete = null ;
+          oTerminal.Cursor("Blink") ;
+        }
 
         return sStateNew ;
       }
@@ -63,6 +129,9 @@
       oState.afHandlers["SPLASH_HEADER_TRANSITION"] = function (sStateCurrent, sStateNew)
       {
         iEliptus.onclick = null ;
+
+        oTerminal.Cursor("Hidden") ;
+        oTerminal.Clear() ;
 
         iClone = null ;
         anOffsetCurrent = new Array() ;
@@ -132,6 +201,8 @@
 
       oSplash.Element.style.visibility = "hidden" ;
       oSplash.ContentSet(iEliptus) ;
+
+      oTerminal.Cursor("Hidden") ;
 
       oState.NewTrigger(null, "WINDOW_LOADING")() ;
 

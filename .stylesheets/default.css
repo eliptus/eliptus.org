@@ -50,3 +50,8 @@ body
   max-height : 100% ;
 }
 
+.TerminalContainer
+{
+  font-family : "Courier" ;
+}
+
