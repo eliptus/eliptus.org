@@ -1,94 +1,105 @@
 function FadeObject()
 {
-  var This = this ;
-  var oInterval = null ;
-  var nOpacityGoal = null ;
-  var nTimeStarted = null ;
+}
 
-  function _Execute()
+FadeObject.prototype =
+{
+  Element : null ,
+  nOpacityGoal : null ,
+  fUpdate : null ,
+  fComplete : null ,
+  oInterval : null ,
+  nTimeStepMs : 30 ,
+
+  Execute : function ( nTimeToFade )
   {
-    if ( null != oInterval )
+    var This = this ;
+    var nOpacityGoal = null ;
+    var fWork = null ;
+
+    if ( null != this.oInterval )
     {
-      clearInterval(oInterval) ;
-      delete oInterval ;
-      oInterval = null ;
+      clearInterval(this.oInterval) ;
+      delete this.oInterval ;
+      this.oInterval = null ;
     }
-    else if ( '' == This.Element.style.opacity)
+    else if ( '' == this.Element.style.opacity)
     {
-      This.Element.style.opacity = 1 ;
+      this.Element.style.opacity = 1 ;
     }
 
-    if ( null == This.nTimeToFade )
+    if ( null == nTimeToFade )
     {
-      This.nTimeToFade = 0 ;
+      nTimeToFade = 0 ;
     }
 
-    nOpacityGoal = This.nOpacityGoal ;
+    nOpacityGoal = this.nOpacityGoal ;
 
-    nTimeStarted = new Date().getTime() ;
-    oInterval = setInterval(_Work, 30) ;
+    nTimeGoal = new Date().getTime() + nTimeToFade ;
 
-    _Work() ;
-  }
+    fWork = function ()
+    {
+      This.Work
+      (
+        nOpacityGoal,
+        nTimeGoal
+      ) ;
+    } ;
 
-  function _Work()
+    this.oInterval = setInterval(fWork, this.nTimeStepMs) ;
+
+    fWork() ;
+  } ,
+
+  Work : function
+  (
+    nOpacityGoal,
+    nTimeGoal
+  )
   {
     var nTimeCurrent ;
-    var nTimeElapsed ;
     var nOpacityStep ;
 
     nTimeCurrent = new Date().getTime() ;
-    nTimeElapsed = nTimeCurrent - nTimeStarted ;
 
-    if ( nTimeElapsed < This.nTimeToFade )
+    if ( nTimeGoal > nTimeCurrent )
     {
-      nOpacityStep = nOpacityGoal - This.Element.style.opacity ;
-      nOpacityStep *= ( nTimeElapsed ) / This.nTimeToFade ;
-      This.Element.style.opacity = Number(This.Element.style.opacity) + nOpacityStep ;
+      nOpacityStep = nOpacityGoal - this.Element.style.opacity ;
+      nOpacityStep *= ( this.nTimeStepMs ) / ( this.nTimeStepMs + nTimeGoal - nTimeCurrent ) ;
+      this.Element.style.opacity = Number(this.Element.style.opacity) + nOpacityStep ;
 
-      This.nTimeToFade -= nTimeElapsed ;
-      nTimeStarted = nTimeCurrent ;
-
-      if ( null != This.fUpdate )
+      if ( null != this.fUpdate )
       {
-        if ( "function" == typeof(This.fUpdate) )
+        if ( "function" == typeof(this.fUpdate) )
         {
-          This.fUpdate() ;
+          this.fUpdate() ;
         }
         else
         {
-          eval(This.fUpdate) ;
+          eval(this.fUpdate) ;
         }
       }
     }
     else
     {
-      clearInterval(oInterval) ;
-      delete oInterval ;
-      oInterval = null ;
+      clearInterval(this.oInterval) ;
+      delete this.oInterval ;
+      this.oInterval = null ;
 
-      This.Element.style.opacity = nOpacityGoal ;
+      this.Element.style.opacity = nOpacityGoal ;
 
-      if ( null != This.fComplete )
+      if ( null != this.fComplete )
       {
-        if ( "function" == typeof(This.fComplete) )
+        if ( "function" == typeof(this.fComplete) )
         {
-          This.fComplete() ;
+          this.fComplete() ;
         }
         else
         {
-          eval(This.fComplete) ;
+          eval(this.fComplete) ;
         }
       }
     }
-  }
-
-  This.Element = null ;
-  This.nOpacityGoal = null ;
-  This.nTimeToFade = null ;
-  This.fUpdate = null ;
-  This.fComplete = null ;
-
-  This.Execute = _Execute ;
+  } ,
 }
 

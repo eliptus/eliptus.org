@@ -79,13 +79,12 @@
         oTerminal.Clear() ;
 
         oSplash.Element.style.opacity = 0 ;
-        oSplash.Element.style.visibility = "visible" ;
+        oSplash.Element.style.visibility = null ;
 
         oFader.Element = oSplash.Element ;
         oFader.nOpacityGoal = 1 ;
-        oFader.nTimeToFade = 1000 ;
         oFader.fComplete = oState.NewTrigger(sStateNew, "SPLASH_OPAQUE") ;
-        oFader.Execute() ;
+        oFader.Execute(1000) ;
 
         return sStateNew ;
       }
@@ -149,7 +148,7 @@
         iClone.style.width = String(anOffsetCurrent[2]) + "px" ;
         iClone.style.height = String(anOffsetCurrent[3]) + "px" ;
         Document.body.appendChild(iClone) ;
-        iClone.style.visibility = "visible" ;
+        iClone.style.visibility = null ;
 
         oSplash.Element.style.visibility = "hidden" ;
 
@@ -163,9 +162,8 @@
         oMover.sYGoal = String(anOffsetGoal[1]) + "px" ;
         oMover.sWidthGoal = String(anOffsetGoal[2]) + "px" ;
         oMover.sHeightGoal = String(anOffsetGoal[3]) + "px" ;
-        oMover.nTimeToMove = 1000 ;
         oMover.fComplete = oState.NewTrigger(sStateNew, "HEADER_FADING_IN") ;
-        oMover.Execute() ;
+        oMover.Execute(500) ;
 
         return sStateNew ;
       }
@@ -173,13 +171,12 @@
       oState.afHandlers["HEADER_FADING_IN"] = function (sStateCurrent, sStateNew)
       {
         oHeader.Element.style.opacity = 0 ;
-        oHeader.Element.style.visibility = "visible" ;
+        oHeader.Element.style.visibility = null ;
 
         oFader.Element = oHeader.Element ;
         oFader.nOpacityGoal = 1 ;
-        oFader.nTimeToFade = 1000 ;
         oFader.fComplete = oState.NewTrigger(sStateNew, "HEADER_OPAQUE") ;
-        oFader.Execute() ;
+        oFader.Execute(500) ;
 
         return sStateNew ;
       }

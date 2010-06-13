@@ -1,15 +1,19 @@
 function StateObject()
 {
-  var This = this ;
-  var sStateCurrent = null ;
+  this.afHandlers = new Array() ;
+}
 
-  function _Change(sStateOld, sStateNew)
+StateObject.prototype =
+{
+  sStateCurrent : null ,
+
+  Change : function (sStateOld, sStateNew)
   {
     var err = 0 ;
 
     if ( !err )
     {
-      if ( sStateCurrent != sStateOld )
+      if ( this.sStateCurrent != sStateOld )
       {
         err = -1 ;
       }
@@ -18,7 +22,7 @@ function StateObject()
 
     if ( !err )
     {
-      if ( null == This.afHandlers[sStateNew] )
+      if ( null == this.afHandlers[sStateNew] )
       {
         err = -1 ;
       }
@@ -26,184 +30,387 @@ function StateObject()
 
     if ( !err )
     {
-      sStateCurrent = This.afHandlers[sStateNew](sStateOld, sStateNew) ;
-      if ( sStateCurrent != sStateNew )
+      this.sStateCurrent = this.afHandlers[sStateNew](sStateOld, sStateNew) ;
+      if ( this.sStateCurrent != sStateNew )
       {
         err = -1 ;
       }
     }
-  }
+  } ,
 
-  function _NewTrigger(sStateOld, sStateNew)
+  NewTrigger : function (sStateOld, sStateNew)
   {
+    var This = this ;
+
     return function(){This.Change(sStateOld,sStateNew);} ;
-  }
-
-  This.afHandlers = new Array() ;
-
-  This.Change = _Change ;
-  This.NewTrigger = _NewTrigger ;
-}
+  } ,
+} ;
 
 function MoveObject()
 {
-  var This = this ;
-  var oInterval = null ;
-  var nXGoal = null ;
-  var nYGoal = null ;
-  var nWidthGoal = null ;
-  var nHeightGoal = null ;
-  var nTimeStarted = null ;
+}
 
-  function _Execute()
+MoveObject.prototype =
+{
+  Element : null ,
+  sXGoal : null ,
+  sYGoal : null ,
+  sWidthGoal : null ,
+  sHeightGoal : null ,
+  fUpdate : null ,
+  fComplete : null ,
+  oInterval : null ,
+  nTimeStepMs : 30 ,
+
+  Execute : function ( nTimeToMove )
   {
+    var This = this ;
+    var nXGoal = null ;
+    var nYGoal = null ;
+    var nWidthGoal = null ;
+    var nHeightGoal = null ;
+    var nTimeGoal = null ;
+    var fWork = null ;
+
     var eClone ;
 
-    if ( null != oInterval )
+    if ( null != this.oInterval )
     {
-      clearInterval(oInterval) ;
-      delete oInterval ;
-      oInterval = null ;
+      clearInterval(this.oInterval) ;
+      delete this.oInterval ;
+      this.oInterval = null ;
     }
 
-    if ( null == This.nTimeToMove )
+    if ( null == nTimeToMove )
     {
-      This.nTimeToMove = 0 ;
+      nTimeToMove = 0 ;
     }
 
-    eClone = This.Element.cloneNode(true) ;
+    eClone = this.Element.cloneNode(true) ;
     eClone.style.visibility = "hidden" ;
-    This.Element.parentNode.appendChild(eClone) ;
-    if ( null != This.sXGoal )
+    this.Element.parentNode.appendChild(eClone) ;
+    if ( null != this.sXGoal )
     {
-      eClone.style.left = This.sXGoal ;
+      eClone.style.left = this.sXGoal ;
       nXGoal = eClone.offsetLeft ;
     }
-    if ( null != This.sYGoal )
+    if ( null != this.sYGoal )
     {
-      eClone.style.top = This.sYGoal ;
+      eClone.style.top = this.sYGoal ;
       nYGoal = eClone.offsetTop ;
     }
-    if ( null != This.sWidthGoal )
+    if ( null != this.sWidthGoal )
     {
-      eClone.style.width = This.sWidthGoal ;
+      eClone.style.width = this.sWidthGoal ;
       nWidthGoal = eClone.offsetWidth ;
     }
-    if ( null != This.sHeightGoal )
+    if ( null != this.sHeightGoal )
     {
-      eClone.style.height = This.sHeightGoal ;
+      eClone.style.height = this.sHeightGoal ;
       nHeightGoal = eClone.offsetHeight ;
     }
-    This.Element.parentNode.removeChild(eClone) ;
+    this.Element.parentNode.removeChild(eClone) ;
     delete eClone ;
 
-    nTimeStarted = new Date().getTime() ;
-    oInterval = setInterval(_Work, 30) ;
+    nTimeGoal = new Date().getTime() + nTimeToMove ;
 
-    _Work() ;
-  }
+    fWork = function ()
+    {
+      This.Work
+      (
+        nXGoal,
+        nYGoal,
+        nWidthGoal,
+        nHeightGoal,
+        nTimeGoal
+      ) ;
+    } ;
 
-  function _Work()
+    this.oInterval = setInterval(fWork, this.nTimeStepMs) ;
+
+    fWork() ;
+  } ,
+
+  Work : function
+  (
+    nXGoal,
+    nYGoal,
+    nWidthGoal,
+    nHeightGoal,
+    nTimeGoal
+  )
   {
     var nTimeCurrent ;
-    var nTimeElapsed ;
     var nXStep ;
     var nYStep ;
     var nWidthStep ;
     var nHeightStep ;
 
     nTimeCurrent = new Date().getTime() ;
-    nTimeElapsed = nTimeCurrent - nTimeStarted ;
 
-    if ( nTimeElapsed < This.nTimeToMove )
+    if ( nTimeGoal > nTimeCurrent )
     {
       if ( null != nXGoal )
       {
-        nXStep = nXGoal - This.Element.offsetLeft ;
-        nXStep *= ( nTimeElapsed ) / This.nTimeToMove ;
-        This.Element.style.left = String(nXStep + This.Element.offsetLeft) + 'px' ;
+        nXStep = nXGoal - this.Element.offsetLeft ;
+        nXStep *= ( this.nTimeStepMs ) / ( this.nTimeStepMs + nTimeGoal - nTimeCurrent ) ;
+        this.Element.style.left = String(nXStep + this.Element.offsetLeft) + 'px' ;
       }
       if ( null != nYGoal )
       {
-        nYStep = nYGoal - This.Element.offsetTop ;
-        nYStep *= ( nTimeElapsed ) / This.nTimeToMove ;
-        This.Element.style.top = String(nYStep + This.Element.offsetTop) + 'px' ;
+        nYStep = nYGoal - this.Element.offsetTop ;
+        nYStep *= ( this.nTimeStepMs ) / ( this.nTimeStepMs + nTimeGoal - nTimeCurrent ) ;
+        this.Element.style.top = String(nYStep + this.Element.offsetTop) + 'px' ;
       }
       if ( null != nWidthGoal )
       {
-        nWidthStep = nWidthGoal - This.Element.offsetWidth ;
-        nWidthStep *= ( nTimeElapsed ) / This.nTimeToMove ;
-        This.Element.style.width = String(nWidthStep + This.Element.offsetWidth) + 'px';
+        nWidthStep = nWidthGoal - this.Element.offsetWidth ;
+        nWidthStep *= ( this.nTimeStepMs ) / ( this.nTimeStepMs + nTimeGoal - nTimeCurrent ) ;
+        this.Element.style.width = String(nWidthStep + this.Element.offsetWidth) + 'px';
       }
       if ( null != nHeightGoal )
       {
-        nHeightStep = nHeightGoal - This.Element.offsetHeight ;
-        nHeightStep *= ( nTimeElapsed ) / This.nTimeToMove ;
-        This.Element.style.height = String(nHeightStep + This.Element.offsetHeight) + 'px';
+        nHeightStep = nHeightGoal - this.Element.offsetHeight ;
+        nHeightStep *= ( this.nTimeStepMs ) / ( this.nTimeStepMs + nTimeGoal - nTimeCurrent ) ;
+        this.Element.style.height = String(nHeightStep + this.Element.offsetHeight) + 'px';
       }
 
-      This.nTimeToMove -= nTimeElapsed ;
-      nTimeStarted = nTimeCurrent ;
-
-      if ( null != This.fUpdate )
+      if ( null != this.fUpdate )
       {
-        if ( "function" == typeof(This.fUpdate) )
+        if ( "function" == typeof(this.fUpdate) )
         {
-          This.fUpdate() ;
+          this.fUpdate() ;
         }
         else
         {
-          eval(This.fUpdate) ;
+          eval(this.fUpdate) ;
         }
       }
     }
     else
     {
-      clearInterval(oInterval) ;
-      delete oInterval ;
-      oInterval = null ;
+      clearInterval(this.oInterval) ;
+      delete this.oInterval ;
+      this.oInterval = null ;
 
       if ( null != nXGoal )
       {
-        This.Element.style.left = String(nXGoal) + 'px' ;
+        this.Element.style.left = String(nXGoal) + 'px' ;
       }
       if ( null != nYGoal )
       {
-        This.Element.style.top = String(nYGoal) + 'px' ;
+        this.Element.style.top = String(nYGoal) + 'px' ;
       }
       if ( null != nWidthGoal )
       {
-        This.Element.style.width = String(nWidthGoal) + 'px';
+        this.Element.style.width = String(nWidthGoal) + 'px';
       }
       if ( null != nHeightGoal )
       {
-        This.Element.style.height = String(nHeightGoal) + 'px';
+        this.Element.style.height = String(nHeightGoal) + 'px';
       }
 
-      if ( null != This.fComplete )
+      if ( null != this.fComplete )
       {
-        if ( "function" == typeof(This.fComplete) )
+        if ( "function" == typeof(this.fComplete) )
         {
-          This.fComplete() ;
+          this.fComplete() ;
         }
         else
         {
-          eval(This.fComplete) ;
+          eval(this.fComplete) ;
         }
       }
     }
-  }
+  } ,
+} ;
 
-  This.Element = null ;
-  This.sXGoal = null ;
-  This.sYGoal = null ;
-  This.sWidthGoal = null ;
-  This.sHeightGoal = null ;
-  This.nTimeToMove = null ;
-  This.fUpdate = null ;
-  This.fComplete = null ;
+function HeaderObject()
+{
+  var nIndex = HeaderObject.prototype.nCount++ ;
 
-  This.Execute = _Execute ;
+  this.Element = Document.createElement("div") ;
+  this.Element.className = "HeaderContainer"
+  this.Element.id = this.Element.className + nIndex ;
+}
+
+HeaderObject.prototype =
+{
+  nCount : 0 ,
+
+  ContentSet : function (eContent)
+  {
+    var eFirstChild = this.Element.firstChild ;
+
+    eContent.className = "HeaderContent" ;
+
+    if ( null == eFirstChild )
+    {
+      this.Element.appendChild(eContent) ;
+    }
+    else
+    {
+      this.Element.replaceChild(eContent, eFirstChild) ;
+    }
+  } ,
+
+  Add : function (eParent)
+  {
+    eParent.appendChild(this.Element) ;
+  } ,
+}
+
+function TerminalObject()
+{
+
+  this.nIndex = TerminalObject.prototype.nCount++ ;
+
+  this.eText = Document.createElement("span") ;
+  this.eText.className = "TerminalText" ;
+
+  this.eCursor = Document.createElement("span") ;
+  this.eCursor.className = "TerminalCursor" ;
+  this.eCursor.innerHTML = "_" ;
+
+  this.Element = Document.createElement("span") ;
+  this.Element.className = "TerminalContainer"
+  this.Element.id = this.Element.className + this.nIndex
+  this.Element.appendChild(this.eText) ;
+  this.Element.appendChild(this.eCursor) ;
+}
+
+TerminalObject.prototype =
+{
+  nCount : 0 ,
+  eText : null ,
+  eCursor : null ,
+  sTextInput : '' ,
+  oTextInterval : null ,
+  oCursorInterval : null ,
+  fUpdate : null ,
+  fComplete : null ,
+
+  TypeWork : function ()
+  {
+    this.eText.innerHTML += this.sTextInput.substring(0,1) ;
+    this.sTextInput = this.sTextInput.substring(1) ;
+    if ( '' != this.sTextInput )
+    {
+      if ( null != this.fUpdate )
+      {
+        if ( "function" == typeof(this.fUpdate) )
+        {
+          this.fUpdate() ;
+        }
+        else
+        {
+          eval(this.fUpdate) ;
+        }
+      }
+    }
+    else
+    {
+      clearInterval(this.oTextInterval) ;
+      delete this.oTextInterval ;
+      this.oTextInterval = null ;
+
+      if ( null != this.fComplete )
+      {
+        if ( "function" == typeof(this.fComplete) )
+        {
+          this.fComplete() ;
+        }
+        else
+        {
+          eval(this.fComplete) ;
+        }
+      }
+    }
+  } ,
+
+  CursorToggle : function ()
+  {
+    if ( "hidden" != this.eCursor.style.visibility )
+    {
+      this.eCursor.style.visibility = "hidden" ;
+    }
+    else
+    {
+      this.eCursor.style.visibility = null ;
+    }
+  } ,
+
+  Add : function (eParent)
+  {
+    eParent.appendChild(this.Element) ;
+    this.eCursor.style.backgroundColor = fGetStyle(this.Element, "color") ;
+  } ,
+
+  Type : function (sInput)
+  {
+    var This = this ;
+    var fWork = null ;
+
+    this.sTextInput += sInput ;
+
+    if ( ('' != this.sTextInput) && (null == this.oTextInterval) )
+    {
+      fWork = function ()
+      {
+        This.TypeWork() ;
+      }
+      this.oTextInterval = setInterval(fWork, 100) ;
+    }
+  } ,
+
+  Clear : function ()
+  {
+    if ( null != this.oTextInterval )
+    {
+      clearInterval(this.oTextInterval) ;
+      delete this.oTextInterval ;
+      this.oTextInterval = null ;
+    }
+
+    this.sTextInput = '' ;
+    this.eText.innerHTML = '' ;
+  } ,
+
+  Cursor : function (sState)
+  {
+    var This = this ;
+    var fWork = null ;
+
+    if ( null != this.oCursorInterval )
+    {
+      clearInterval(this.oCursorInterval) ;
+      delete this.oCursorInterval ;
+      this.oCursorInterval = null ;
+    }
+
+    switch ( sState )
+    {
+      case "Visible" :
+        this.eCursor.style.visibility = null ;
+        break ;
+
+      case "Hidden" :
+        this.eCursor.style.visibility = "hidden" ;
+        break ;
+
+      case "Toggle" :
+        this.CursorToggle() ;
+        break ;
+
+      case "Blink" :
+        fWork = function ()
+        {
+          This.CursorToggle() ;
+        }
+        this.oCursorInterval = setInterval(fWork, 500) ;
+        break ;
+    }
+  } ,
 }
 
 function fGetWindowOffset(oElement)
@@ -236,174 +443,5 @@ function fGetStyle(oElement, sProperty)
     }
 
     return sValue;
-}
-
-var gnHeaders = 0 ;
-
-function HeaderObject()
-{
-  var This = this ;
-  var nIndex = gnHeaders++ ;
-
-  function _ContentSet(eContent)
-  {
-    var eFirstChild = This.Element.firstChild ;
-
-    eContent.className = "HeaderContent" ;
-
-    if ( null == eFirstChild )
-    {
-      This.Element.appendChild(eContent) ;
-    }
-    else
-    {
-      This.Element.replaceChild(eContent, eFirstChild) ;
-    }
-  }
-
-  function _Add(eParent)
-  {
-    eParent.appendChild(This.Element) ;
-  }
-
-  This.Element = Document.createElement("div") ;
-  This.Element.className = "HeaderContainer"
-  This.Element.id = This.Element.className + This.Index ;
-
-  This.ContentSet = _ContentSet ;
-  This.Add = _Add ;
-}
-
-function TerminalObject()
-{
-  var This = this ;
-  var eText = null ;
-  var eCursor = null ;
-  var sTextInput = '' ;
-  var oTextInterval = null ;
-  var oCursorInterval = null ;
-
-  eText = Document.createElement("span") ;
-  eText.className = "TerminalText" ;
-
-  eCursor = Document.createElement("span") ;
-  eCursor.className = "TerminalCursor" ;
-  eCursor.innerHTML = "_" ;
-
-  function _TypeWork()
-  {
-    eText.innerHTML += sTextInput.substring(0,1) ;
-    sTextInput = sTextInput.substring(1) ;
-    if ( '' != sTextInput )
-    {
-      if ( null != This.fUpdate )
-      {
-        if ( "function" == typeof(This.fUpdate) )
-        {
-          This.fUpdate() ;
-        }
-        else
-        {
-          eval(This.fUpdate) ;
-        }
-      }
-    }
-    else
-    {
-      clearInterval(oTextInterval) ;
-      delete oTextInterval ;
-      oTextInterval = null ;
-
-      if ( null != This.fComplete )
-      {
-        if ( "function" == typeof(This.fComplete) )
-        {
-          This.fComplete() ;
-        }
-        else
-        {
-          eval(This.fComplete) ;
-        }
-      }
-    }
-  }
-
-  function _CursorToggle()
-  {
-    if ( "hidden" != eCursor.style.visibility )
-    {
-      eCursor.style.visibility = "hidden" ;
-    }
-    else
-    {
-      eCursor.style.visibility = "visible" ;
-    }
-  }
-
-  This.Element = Document.createElement("span") ;
-  This.Element.className = "TerminalContainer"
-  This.Element.appendChild(eText) ;
-  This.Element.appendChild(eCursor) ;
-
-  This.fUpdate = null ;
-  This.fComplete = null ;
-
-  This.Add = function (eParent)
-  {
-    eParent.appendChild(This.Element) ;
-    eCursor.style.backgroundColor = fGetStyle(This.Element, "color") ;
-  }
-
-  This.Type = function (sInput)
-  {
-    sTextInput += sInput ;
-
-    if ( ('' != sTextInput) && (null == oTextInterval) )
-    {
-      oTextInterval = setInterval(_TypeWork, 100) ;
-    }
-  }
-
-  This.Clear = function ()
-  {
-    if ( null != oTextInterval )
-    {
-      clearInterval(oTextInterval) ;
-      delete oTextInterval ;
-      oTextInterval = null ;
-    }
-
-    sTextInput = '' ;
-    eText.innerHTML = '' ;
-  }
-
-  This.Cursor = function (sState)
-  {
-    if ( null != oCursorInterval )
-    {
-      clearInterval(oCursorInterval) ;
-      delete oCursorInterval ;
-      oCursorInterval = null ;
-    }
-
-    switch ( sState )
-    {
-      case "Visible" :
-        eCursor.style.visibility = "visible" ;
-        break ;
-
-      case "Hidden" :
-        eCursor.style.visibility = "hidden" ;
-        break ;
-
-      case "Toggle" :
-        _CursorToggle() ;
-        break ;
-
-      case "Blink" :
-        oCursorInterval = setInterval(_CursorToggle, 500) ;
-        break ;
-    }
-  }
 }
 
