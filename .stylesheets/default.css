@@ -6,7 +6,7 @@ body
 
 .SplashContainer
 {
-  position : fixed ;
+  position : absolute ;
   text-align : center ;
   left : 0% ;
   top : 0% ;
@@ -32,14 +32,15 @@ body
 
 .HeaderContainer
 {
-  position : fixed ;
+  position : absolute ;
   text-align : center ;
   left : 0px ;
   top : 0px ;
   right : 0px ;
   height : 100px ;
-  border-bottom-style : double ;
-  border-bottom-width : thick ;
+  border-style : solid ;
+  border-width : 4px ;
+  margin : 5px ;
 }
 
 .HeaderContainer .HeaderContent
@@ -48,6 +49,85 @@ body
   vertical-align : middle ;
   max-width : 100% ;
   max-height : 100% ;
+}
+
+.HeaderContainer .HeaderTop
+{
+  position : absolute ;
+  display : block ;
+  clear : both ;
+  left : 4px ;
+  right : 4px ;
+  top : -4px ;
+  height : 8px ;
+}
+
+.HeaderContainer .HeaderCenter
+{
+  position : absolute ;
+  display : block ;
+  clear : both ;
+  left : 4px ;
+  right : 4px ;
+  top : 4px ;
+  bottom : 4px ;
+}
+
+.HeaderContainer .HeaderBottom
+{
+  position : absolute ;
+  display : block ;
+  clear : both ;
+  left : 4px ;
+  right : 4px ;
+  bottom : -4px ;
+  height : 8px ;
+}
+
+.HeaderContainer .HeaderLeft
+{
+  position : absolute ;
+  display : block ;
+  clear : both ;
+  left : -8px ;
+  top : 0px ;
+  bottom : 0px ;
+  width : 8px ;
+}
+
+.HeaderContainer .HeaderRight
+{
+  position : absolute ;
+  display : block ;
+  clear : both ;
+  right : -8px ;
+  top : 0px ;
+  bottom : 0px ;
+  width : 8px ;
+}
+
+.HeaderContainer .HeaderTop .HeaderLeft
+{
+  background-image : url('../.images/RedBorder.png') ;
+  background-position : top left ;
+}
+
+.HeaderContainer .HeaderTop .HeaderRight
+{
+  background-image : url('../.images/RedBorder.png') ;
+  background-position : top right ;
+}
+
+.HeaderContainer .HeaderBottom .HeaderLeft
+{
+  background-image : url('../.images/RedBorder.png') ;
+  background-position : bottom left ;
+}
+
+.HeaderContainer .HeaderBottom .HeaderRight
+{
+  background-image : url('../.images/RedBorder.png') ;
+  background-position : bottom right ;
 }
 
 .TerminalContainer

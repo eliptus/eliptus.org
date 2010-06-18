@@ -227,11 +227,30 @@ MoveObject.prototype =
 
 function HeaderObject()
 {
+  var eRow = null ;
+  var eData = null ;
+  var sRows = ["Center","Top","Bottom"] ;
+  var sData = ["Left","Right"] ;
   var nIndex = HeaderObject.prototype.nCount++ ;
+  var i = 0, j = 0 ;
 
-  this.Element = Document.createElement("div") ;
+  this.Element = document.createElement('div') ;
   this.Element.className = "HeaderContainer"
   this.Element.id = this.Element.className + nIndex ;
+
+  for ( i in sRows )
+  {
+    eRow = document.createElement('div') ;
+    eRow.className = "Header" + sRows[i] ;
+    this.Element.appendChild(eRow) ;
+
+    for ( j in sData )
+    {
+      eData = document.createElement('span') ;
+      eData.className = "Header" + sData[j] ;
+      eRow.appendChild(eData) ;
+    }
+  }
 }
 
 HeaderObject.prototype =
@@ -240,17 +259,17 @@ HeaderObject.prototype =
 
   ContentSet : function (eContent)
   {
-    var eFirstChild = this.Element.firstChild ;
+    var eLastChild = this.Element.lastChild ;
 
     eContent.className = "HeaderContent" ;
 
-    if ( null == eFirstChild )
+    if ( "HeaderContent" != eLastChild.className )
     {
       this.Element.appendChild(eContent) ;
     }
     else
     {
-      this.Element.replaceChild(eContent, eFirstChild) ;
+      this.Element.replaceChild(eContent, eLastChild) ;
     }
   } ,
 
@@ -413,22 +432,6 @@ TerminalObject.prototype =
   } ,
 }
 
-function fGetWindowOffset(oElement)
-{
-  var oCurrent = oElement ;
-  var nOffsetTop = 0 ;
-  var nOffsetLeft = 0 ;
-
-  while ( null != oCurrent )
-  {
-    nOffsetLeft += oCurrent.offsetLeft ;
-    nOffsetTop += oCurrent.offsetTop ;
-    oCurrent = oCurrent.offsetParent ;
-  }
-
-  return [nOffsetLeft, nOffsetTop] ;
-}
-
 function fGetStyle(oElement, sProperty)
 {
     var sValue
@@ -443,5 +446,25 @@ function fGetStyle(oElement, sProperty)
     }
 
     return sValue;
+}
+
+function fGetWindowOffset(oElement)
+{
+  var oCurrent = oElement.offsetParent ;
+  var nOffsetLeft = oElement.offsetLeft ;
+  var nOffsetTop = oElement.offsetTop ;
+
+  while ( (null != oCurrent) && (document.body != oCurrent) )
+  {
+    nOffsetLeft += parseFloat(fGetStyle(oCurrent, "border-left-width")) ;
+    nOffsetLeft += oCurrent.offsetLeft ;
+
+    nOffsetTop += parseFloat(fGetStyle(oCurrent, "border-top-width")) ;
+    nOffsetTop += oCurrent.offsetTop ;
+
+    oCurrent = oCurrent.offsetParent ;
+  }
+
+  return [nOffsetLeft, nOffsetTop] ;
 }
 

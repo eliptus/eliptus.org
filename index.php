@@ -102,6 +102,8 @@
 
         if ( 0 == nStateRepeat )
         {
+          oSplash.Element.style.opacity = null ;
+
           iEliptus.onclick = oState.NewTrigger(sStateNew, "SPLASH_HEADER_TRANSITION") ;
           oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 5000) ;
         }
@@ -127,62 +129,78 @@
 
       oState.afHandlers["SPLASH_HEADER_TRANSITION"] = function (sStateCurrent, sStateNew)
       {
-        iEliptus.onclick = null ;
+        if ( sStateCurrent != sStateNew )
+        {
+          nStateRepeat = 0 ;
+        }
+        else
+        {
+          nStateRepeat++ ;
+        }
 
-        oTerminal.Cursor("Hidden") ;
-        oTerminal.Clear() ;
+        if ( 0 == nStateRepeat )
+        {
+          iEliptus.onclick = null ;
 
-        iClone = null ;
-        anOffsetCurrent = new Array() ;
-        anOffsetGoal = new Array() ;
+          oTerminal.Cursor("Hidden") ;
+          oTerminal.Clear() ;
 
-        anOffsetCurrent = anOffsetCurrent.concat(fGetWindowOffset(iEliptus)) ;
-        anOffsetCurrent.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
+          iClone = null ;
+          anOffsetCurrent = new Array() ;
+          anOffsetGoal = new Array() ;
 
-        iClone = iEliptus.cloneNode(true) ;
-        iClone.id = "iClone" ;
-        iClone.style.visibility = "hidden" ;
-        iClone.style.position = "fixed" ;
-        iClone.style.left = String(anOffsetCurrent[0]) + "px" ;
-        iClone.style.top = String(anOffsetCurrent[1]) + "px" ;
-        iClone.style.width = String(anOffsetCurrent[2]) + "px" ;
-        iClone.style.height = String(anOffsetCurrent[3]) + "px" ;
-        Document.body.appendChild(iClone) ;
-        iClone.style.visibility = null ;
+          anOffsetCurrent = anOffsetCurrent.concat(fGetWindowOffset(iEliptus)) ;
+          anOffsetCurrent.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
 
-        oSplash.Element.style.visibility = "hidden" ;
+          iClone = iEliptus.cloneNode(true) ;
+          iClone.id = "iClone" ;
+          iClone.style.visibility = "hidden" ;
+          iClone.style.position = "fixed" ;
+          iClone.style.left = String(anOffsetCurrent[0]) + "px" ;
+          iClone.style.top = String(anOffsetCurrent[1]) + "px" ;
+          iClone.style.width = String(anOffsetCurrent[2]) + "px" ;
+          iClone.style.height = String(anOffsetCurrent[3]) + "px" ;
+          Document.body.appendChild(iClone) ;
+          iClone.style.visibility = null ;
 
-        oHeader.ContentSet(iEliptus) ;
+          oSplash.Element.style.visibility = "hidden" ;
 
-        anOffsetGoal = anOffsetGoal.concat(fGetWindowOffset(iEliptus)) ;
-        anOffsetGoal.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
+          iEliptus.style.visibility = "hidden" ;
 
-        oMover.Element = iClone ;
-        oMover.sXGoal = String(anOffsetGoal[0]) + "px" ;
-        oMover.sYGoal = String(anOffsetGoal[1]) + "px" ;
-        oMover.sWidthGoal = String(anOffsetGoal[2]) + "px" ;
-        oMover.sHeightGoal = String(anOffsetGoal[3]) + "px" ;
-        oMover.fComplete = oState.NewTrigger(sStateNew, "HEADER_FADING_IN") ;
-        oMover.Execute(500) ;
+          oHeader.Element.style.opacity = 0 ;
+          oHeader.Element.style.visibility = null ;
+          oHeader.ContentSet(iEliptus) ;
 
-        return sStateNew ;
-      }
+          anOffsetGoal = anOffsetGoal.concat(fGetWindowOffset(iEliptus)) ;
+          anOffsetGoal.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
 
-      oState.afHandlers["HEADER_FADING_IN"] = function (sStateCurrent, sStateNew)
-      {
-        oHeader.Element.style.opacity = 0 ;
-        oHeader.Element.style.visibility = null ;
+          oMover.Element = iClone ;
+          oMover.sXGoal = String(anOffsetGoal[0]) + "px" ;
+          oMover.sYGoal = String(anOffsetGoal[1]) + "px" ;
+          oMover.sWidthGoal = String(anOffsetGoal[2]) + "px" ;
+          oMover.sHeightGoal = String(anOffsetGoal[3]) + "px" ;
+          oMover.fComplete = oState.NewTrigger(sStateNew, sStateNew) ;
+          oMover.Execute(1000) ;
 
-        oFader.Element = oHeader.Element ;
-        oFader.nOpacityGoal = 1 ;
-        oFader.fComplete = oState.NewTrigger(sStateNew, "HEADER_OPAQUE") ;
-        oFader.Execute(500) ;
+          oFader.Element = oHeader.Element ;
+          oFader.nOpacityGoal = 1 ;
+          oFader.fComplete = oState.NewTrigger(sStateNew, sStateNew) ;
+          oFader.Execute(1000) ;
+        }
+        else if ( 2 == nStateRepeat )
+        {
+          setTimeout(oState.NewTrigger(sStateNew, "HEADER_OPAQUE"), 0) ;
+        }
 
         return sStateNew ;
       }
 
       oState.afHandlers["HEADER_OPAQUE"] = function (sStateCurrent, sStateNew)
       {
+        iEliptus.style.visibility = null ;
+
+        oHeader.Element.style.opacity = null ;
+
         iClone.style.visibility = "hidden" ;
         Document.body.removeChild(iClone) ;
         delete iClone ;
