@@ -18,7 +18,6 @@
       var oMover = new MoveObject() ;
       var oTerminal = new TerminalObject() ;
       var nStateRepeat = 0 ;
-      var oHintTimeout = null ;
 
       oState.afHandlers["WINDOW_LOADING"] = function (sStateCurrent, sStateNew)
       {
@@ -42,18 +41,18 @@
         {
           Window.onload = null ;
 
+          oTerminal.Cursor("Hidden") ;
           oTerminal.Add(Document.body) ;
-          oHeader.Add(Document.body) ;
-          oSplash.Add(Document.body) ;
 
+          setTimeout(oState.NewTrigger(sStateNew, "SPLASH_FADING_IN"), 0) ;
           Window.onmouseover = oState.NewTrigger(sStateNew, "SPLASH_FADING_IN") ;
           Window.onclick = oState.NewTrigger(sStateNew, "SPLASH_FADING_IN") ;
-          oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 5000) ;
+          setTimeout(oState.NewTrigger(sStateNew, sStateNew), 5000) ;
         }
         else if ( 1 == nStateRepeat )
         {
           oTerminal.Cursor("Blink") ;
-          oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 2500) ;
+          setTimeout(oState.NewTrigger(sStateNew, sStateNew), 2500) ;
         }
         else if ( 2 == nStateRepeat )
         {
@@ -79,7 +78,8 @@
         oTerminal.Clear() ;
 
         oSplash.Element.style.opacity = 0 ;
-        oSplash.Element.style.visibility = null ;
+        oSplash.ContentSet(iEliptus) ;
+        oSplash.Add(Document.body) ;
 
         oFader.Element = oSplash.Element ;
         oFader.nOpacityGoal = 1 ;
@@ -104,19 +104,21 @@
         {
           oSplash.Element.style.opacity = null ;
 
+          setTimeout(oState.NewTrigger(sStateNew, "SPLASH_HEADER_TRANSITION"), 0) ;
+          iEliptus.onmouseover = oState.NewTrigger(sStateNew, "SPLASH_HEADER_TRANSITION") ;
           iEliptus.onclick = oState.NewTrigger(sStateNew, "SPLASH_HEADER_TRANSITION") ;
-          oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 5000) ;
+          setTimeout(oState.NewTrigger(sStateNew, sStateNew), 5000) ;
         }
         else if ( 1 == nStateRepeat )
         {
           oTerminal.Cursor("Blink") ;
-          oHintTimeout = setTimeout(oState.NewTrigger(sStateNew, sStateNew), 2500) ;
+          setTimeout(oState.NewTrigger(sStateNew, sStateNew), 2500) ;
         }
         else if ( 2 == nStateRepeat )
         {
           oTerminal.Cursor("Visible") ;
           oTerminal.fComplete = oState.NewTrigger(sStateNew, sStateNew) ;
-          oTerminal.Type("Click the image...") ;
+          oTerminal.Type("Mouse-over or click the image...") ;
         }
         else if ( 3 == nStateRepeat )
         {
@@ -142,8 +144,8 @@
         {
           iEliptus.onclick = null ;
 
-          oTerminal.Cursor("Hidden") ;
           oTerminal.Clear() ;
+          oTerminal.Remove(Document.body) ;
 
           iClone = null ;
           anOffsetCurrent = new Array() ;
@@ -163,13 +165,15 @@
           Document.body.appendChild(iClone) ;
           iClone.style.visibility = null ;
 
-          oSplash.Element.style.visibility = "hidden" ;
+          oSplash.ContentSet() ;
+          oSplash.Remove() ;
 
           iEliptus.style.visibility = "hidden" ;
 
           oHeader.Element.style.opacity = 0 ;
-          oHeader.Element.style.visibility = null ;
           oHeader.ContentSet(iEliptus) ;
+          fSetBorder(oHeader.Element) ;
+          oHeader.Add(Document.body) ;
 
           anOffsetGoal = anOffsetGoal.concat(fGetWindowOffset(iEliptus)) ;
           anOffsetGoal.push(iEliptus.offsetWidth, iEliptus.offsetHeight) ;
@@ -197,13 +201,41 @@
 
       oState.afHandlers["HEADER_OPAQUE"] = function (sStateCurrent, sStateNew)
       {
-        iEliptus.style.visibility = null ;
+        if ( sStateCurrent != sStateNew )
+        {
+          nStateRepeat = 0 ;
+        }
+        else
+        {
+          nStateRepeat++ ;
+        }
 
-        oHeader.Element.style.opacity = null ;
+        if ( 0 == nStateRepeat )
+        {
+          iEliptus.style.visibility = null ;
 
-        iClone.style.visibility = "hidden" ;
-        Document.body.removeChild(iClone) ;
-        delete iClone ;
+          oHeader.Element.style.opacity = null ;
+
+          iClone.style.visibility = "hidden" ;
+          Document.body.removeChild(iClone) ;
+          delete iClone ;
+
+          oTerminal.Cursor("Hidden") ;
+          oTerminal.Add(Document.body) ;
+          oTerminal.Cursor("Blink") ;
+          setTimeout(oState.NewTrigger(sStateNew, sStateNew), 2500) ;
+        }
+        else if ( 1 == nStateRepeat )
+        {
+          oTerminal.Cursor("Visible") ;
+          oTerminal.fComplete = oState.NewTrigger(sStateNew, sStateNew) ;
+          oTerminal.Type("UNDER CONSTRUCTION") ;
+        }
+        else if ( 2 == nStateRepeat )
+        {
+          oTerminal.fComplete = null ;
+          oTerminal.Cursor("Blink") ;
+        }
 
         return sStateNew ;
       }
@@ -211,13 +243,6 @@
       iEliptus.id = "ELIPTUS" ;
       iEliptus.src = ".images/Eliptus Ambigram - Sharp.jpg" ;
       iEliptus.alt = "ELIPTUS" ;
-
-      oHeader.Element.style.visibility = "hidden" ;
-
-      oSplash.Element.style.visibility = "hidden" ;
-      oSplash.ContentSet(iEliptus) ;
-
-      oTerminal.Cursor("Hidden") ;
 
       oState.NewTrigger(null, "WINDOW_LOADING")() ;
 

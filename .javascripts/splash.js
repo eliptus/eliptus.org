@@ -19,23 +19,35 @@ SplashObject.prototype =
 
   ContentSet : function (eContent)
   {
-    var eFirstChild = this.Element.firstChild ;
+    var sClass = "SplashContent" ;
+    var eChild = this.Element.firstChild ;
 
-    eContent.className = "SplashContent" ;
-
-    if ( "SplashContent" == eFirstChild.className )
+    while ( null != eChild )
     {
-      this.Element.replaceChild(eContent, eFirstChild) ;
+      if ( eChild.className.cmContainsWords(sClass) )
+      {
+        eChild.className = eChild.className.cmRemoveWords(sClass) ;
+        this.Element.removeChild(eChild) ;
+      }
+      eChild = eChild.nextSibling ;
     }
-    else
+
+    if ( null != eContent )
     {
-      this.Element.insertBefore(eContent, eFirstChild) ;
+      eContent.className = eContent.className.cmAddWords(sClass) ;
+      this.Element.appendChild(eContent) ;
     }
   } ,
 
   Add : function (eParent)
   {
     eParent.appendChild(this.Element) ;
+  } ,
+
+  Remove : function ()
+  {
+    this.ContentSet() ;
+    this.Element.parentNode.removeChild(this.Element) ;
   } ,
 }
 

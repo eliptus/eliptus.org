@@ -1,3 +1,75 @@
+String.prototype.cmTrim = function ()
+{
+  var sResult = this ;
+
+  rExtraSpaces = /\s{2,}/g ;
+  rBeginSpaces = /^\s+/g ;
+  rEndSpaces = /\s+$/g ;
+
+  sResult = sResult.replace(rExtraSpaces, ' ') ;
+  sResult = sResult.replace(rBeginSpaces, '') ;
+  sResult = sResult.replace(rEndSpaces, '') ;
+
+  if ( '' == sResult )
+  {
+    sResult = null ;
+  }
+
+  return sResult ;
+} ;
+
+String.prototype.cmContainsWords = function()
+{
+  var bResult = false ;
+  var i ;
+
+  for ( i = 0 ; arguments.length > i ; i++ )
+  {
+    rWord = RegExp('\\b' + arguments[i] + '\\b', 'g') ;
+    if ( rWord.test(this) )
+    {
+      bResult = true ;
+      break ;
+    }
+  }
+
+  return bResult ;
+}
+
+String.prototype.cmAddWords = function()
+{
+  var sResult = this ;
+  var i ;
+
+  for ( i = 0 ; arguments.length > i ; i++ )
+  {
+    if ( !sResult.cmContainsWords(arguments[i]) )
+    {
+      sResult += ' ' + arguments[i] ;
+    }
+  }
+
+  sResult = sResult.cmTrim() ;
+
+  return sResult ;
+}
+
+String.prototype.cmRemoveWords = function()
+{
+  var sResult = this ;
+  var i ;
+
+  for ( i = 0 ; arguments.length > i ; i++ )
+  {
+    rWord = RegExp('\\b' + arguments[i] + '\\b', 'g') ;
+    sResult = sResult.replace(rWord, '') ;
+  }
+
+  sResult = sResult.cmTrim() ;
+
+  return sResult ;
+}
+
 function StateObject()
 {
   this.afHandlers = new Array() ;
@@ -227,30 +299,11 @@ MoveObject.prototype =
 
 function HeaderObject()
 {
-  var eRow = null ;
-  var eData = null ;
-  var sRows = ["Center","Top","Bottom"] ;
-  var sData = ["Left","Right"] ;
   var nIndex = HeaderObject.prototype.nCount++ ;
-  var i = 0, j = 0 ;
 
   this.Element = document.createElement('div') ;
-  this.Element.className = "HeaderContainer"
+  this.Element.className = "HeaderContainer" ;
   this.Element.id = this.Element.className + nIndex ;
-
-  for ( i in sRows )
-  {
-    eRow = document.createElement('div') ;
-    eRow.className = "Header" + sRows[i] ;
-    this.Element.appendChild(eRow) ;
-
-    for ( j in sData )
-    {
-      eData = document.createElement('span') ;
-      eData.className = "Header" + sData[j] ;
-      eRow.appendChild(eData) ;
-    }
-  }
 }
 
 HeaderObject.prototype =
@@ -259,17 +312,23 @@ HeaderObject.prototype =
 
   ContentSet : function (eContent)
   {
-    var eLastChild = this.Element.lastChild ;
+    var sClass = "HeaderContent" ;
+    var eChild = this.Element.firstChild ;
 
-    eContent.className = "HeaderContent" ;
-
-    if ( "HeaderContent" != eLastChild.className )
+    while ( null != eChild )
     {
-      this.Element.appendChild(eContent) ;
+      if ( eChild.className.cmContainsWords(sClass) )
+      {
+        eChild.className = eChild.className.cmRemoveWords(sClass) ;
+        this.Element.removeChild(eChild) ;
+      }
+      eChild = eChild.nextSibling ;
     }
-    else
+
+    if ( null != eContent )
     {
-      this.Element.replaceChild(eContent, eLastChild) ;
+      eContent.className = eContent.className.cmAddWords(sClass) ;
+      this.Element.appendChild(eContent) ;
     }
   } ,
 
@@ -291,7 +350,7 @@ function TerminalObject()
   this.eCursor.className = "TerminalCursor" ;
   this.eCursor.innerHTML = "_" ;
 
-  this.Element = Document.createElement("span") ;
+  this.Element = Document.createElement("div") ;
   this.Element.className = "TerminalContainer"
   this.Element.id = this.Element.className + this.nIndex
   this.Element.appendChild(this.eText) ;
@@ -359,12 +418,6 @@ TerminalObject.prototype =
     }
   } ,
 
-  Add : function (eParent)
-  {
-    eParent.appendChild(this.Element) ;
-    this.eCursor.style.backgroundColor = fGetStyle(this.Element, "color") ;
-  } ,
-
   Type : function (sInput)
   {
     var This = this ;
@@ -430,6 +483,17 @@ TerminalObject.prototype =
         break ;
     }
   } ,
+
+  Add : function (eParent)
+  {
+    eParent.appendChild(this.Element) ;
+    this.eCursor.style.backgroundColor = fGetStyle(this.Element, "color") ;
+  } ,
+
+  Remove : function ()
+  {
+    this.Element.parentNode.removeChild(this.Element) ;
+  } ,
 }
 
 function fGetStyle(oElement, sProperty)
@@ -466,5 +530,26 @@ function fGetWindowOffset(oElement)
   }
 
   return [nOffsetLeft, nOffsetTop] ;
+}
+
+function fSetBorder(eTarget)
+{
+  var sClass = "BorderContainer" ;
+  var eTemp = null ;
+  var sRows = ["Top","Bottom"] ;
+  var sColumns = ["Left","Right"] ;
+  var i = 0, j = 0 ;
+
+  eTarget.className = eTarget.className.cmAddWords(sClass) ;
+
+  for ( i in sRows )
+  {
+    for ( j in sColumns )
+    {
+      eTemp = document.createElement('span') ;
+      eTemp.className = "Border" + sRows[i] + sColumns[j] ;
+      eTarget.appendChild(eTemp) ;
+    }
+  }
 }
 
